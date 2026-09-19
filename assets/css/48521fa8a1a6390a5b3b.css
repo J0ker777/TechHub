@@ -1,0 +1,11 @@
+
+.auth-profile{display:flex;align-items:center;gap:9px;min-height:46px;padding:5px 7px;border:1px solid var(--line);border-radius:24px;background:var(--surface,var(--panel,#131d2b));color:var(--text);box-shadow:0 8px 24px #0003}
+.auth-profile[hidden],.auth-profile-avatar[hidden],.auth-profile-fallback[hidden]{display:none}
+.auth-profile-picture{position:relative;width:34px;height:34px;flex:0 0 34px}
+.auth-profile-avatar,.auth-profile-fallback{position:absolute;inset:0;width:34px;height:34px;border-radius:50%;background:var(--line);object-fit:cover}
+.auth-profile-fallback{display:grid;place-items:center;color:var(--text);font-size:13px;font-weight:800}
+.auth-profile-name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:800}
+.auth-profile-logout{align-self:stretch;min-height:34px;padding:5px 11px;border:0;border-left:1px solid var(--line);border-radius:0 18px 18px 0;background:transparent;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
+.auth-profile-logout:hover{color:var(--text)}
+.auth-profile-floating{position:fixed;z-index:100;top:14px;right:18px}
+@media(max-width:600px){.auth-profile-name{max-width:105px}}
