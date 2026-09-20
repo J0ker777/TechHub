@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Як тестувати вебзастосунок: від кнопки в браузері до API та бази даних · IT / Практика</title><link rel="stylesheet" href="assets/css/203500caefe7e9acaff9.css"><link rel="stylesheet" href="assets/css/48521fa8a1a6390a5b3b.css"><link rel="icon" type="image/png" href="assets/images/joker-cube-logo-v1.png"><link rel="canonical" href="https://j0ker777.github.io/TechHub/022-yak-testuvaty-vebzastosunok-vid-knopky-v-brauzeri-do-api-ta-bazy-danykh.html"><meta name="description" content="Коли ми говоримо: «сайт протестований» , що саме це означає? Часто перевірка виглядає приблизно так: Але вебзастосунок — це не тільки те, що ми бачимо в браузері. За звичайною кнопкою «Зберегти» може стояти цілий ланцюжок: І проблема…"><meta property="og:title" content="Як тестувати вебзастосунок: від кнопки в браузері до API та бази даних"><meta property="og:description" content="Коли ми говоримо: «сайт протестований» , що саме це означає? Часто перевірка виглядає приблизно так: Але вебзастосунок — це не тільки те, що ми бачимо в браузері. За звичайною кнопкою «Зберегти» може стояти цілий ланцюжок: І проблема…"><meta property="og:type" content="article"><meta property="og:url" content="https://j0ker777.github.io/TechHub/022-yak-testuvaty-vebzastosunok-vid-knopky-v-brauzeri-do-api-ta-bazy-danykh.html"><meta property="og:image" content="https://j0ker777.github.io/TechHub/assets/previews/022-yak-testuvaty-vebzastosunok-vid-knopky-v-brauzeri-do-api-ta-bazy-danykh-og-v2.jpg"><meta property="og:image:secure_url" content="https://j0ker777.github.io/TechHub/assets/previews/022-yak-testuvaty-vebzastosunok-vid-knopky-v-brauzeri-do-api-ta-bazy-danykh-og-v2.jpg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="675"><meta property="og:image:alt" content="Обкладинка: Як тестувати вебзастосунок: від кнопки в браузері до API та бази даних"><meta property="og:site_name" content="TechHub · Joker"><meta property="og:locale" content="uk_UA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Як тестувати вебзастосунок: від кнопки в браузері до API та бази даних"><meta name="twitter:description" content="Коли ми говоримо: «сайт протестований» , що саме це означає? Часто перевірка виглядає приблизно так: Але вебзастосунок — це не тільки те, що ми бачимо в браузері. За звичайною кнопкою «Зберегти» може стояти цілий ланцюжок: І проблема…"><meta name="twitter:image" content="https://j0ker777.github.io/TechHub/assets/previews/022-yak-testuvaty-vebzastosunok-vid-knopky-v-brauzeri-do-api-ta-bazy-danykh-og-v2.jpg"></head><body id="top"><input class="theme-input" id="theme-toggle" type="checkbox" aria-label="Світла тема"><div class="site"><div class="reading-progress" aria-hidden="true"></div><header><div class="topbar"><div class="masthead"><a class="joker-home-link" href="index.html" aria-label="На головну сторінку TechHub"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"></a><div class="joker-brand-copy"><div><a class="brand" href="#top">IT <b>/</b> ПРАКТИКА</a><span class="edition-note">ТЕХНІЧНІ НОТАТКИ</span></div><span class="joker-byline">Автор матеріалу ·&nbsp;<strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span></div></div><div class="actions"><div class="auth-profile" data-auth-profile hidden><span class="auth-profile-picture"><span class="auth-profile-fallback" data-auth-fallback aria-hidden="true"></span><img class="auth-profile-avatar" data-auth-avatar alt="" width="34" height="34" referrerpolicy="no-referrer" hidden></span><span class="auth-profile-name" data-auth-name></span><button class="auth-profile-logout" data-auth-logout type="button">Вийти</button></div><label class="theme" for="theme-toggle"><span class="theme-dark-label">Світла тема</span><span class="theme-light-label">Темна тема</span></label></div></div></header><main><div class="hero"><div class="eyebrow">Архітектура / IT-практика</div><div class="hero-intro"><h1><span class="headline-topic">Як тестувати вебзастосунок:</span> <span class="headline-text">від кнопки в браузері до API та бази даних</span></h1><div class="issue-number" aria-hidden="true"><b>022</b><span>ВИПУСК / 022</span></div></div><div class="meta"><span class="pill">IT / ПРАКТИКА</span><span>№ 022</span><span>~ 12–14 хв читання</span></div><figure class="cover"><img src="assets/images/022-yak-testuvaty-vebzastosunok-vid-knopky-v-brauzeri-do-api-ta-bazy-danykh.png" width="1672" height="941" alt="Обкладинка: Як тестувати вебзастосунок: від кнопки в браузері до API та бази даних"></figure></div><div class="layout"><aside class="sidebar" aria-label="Зміст статті"><details open><summary>У ЦІЙ СТАТТІ</summary><nav><a href="#section-1">1. Візьмемо простий приклад</a>
+<a href="#section-2">2. Починаємо з позитивного сценарію</a>
+<a href="#section-3">3. Негативні сценарії</a>
+<a href="#section-4">4. Frontend validation — це ще не перевірка системи</a>
+<a href="#section-5">5. Відкриваємо DevTools</a>
+<a href="#section-6">6. HTTP status теж потрібно перевіряти</a>
+<a href="#section-7">7. А тепер обійдемо UI</a>
+<a href="#section-8">8. Не довіряємо ID, який передав клієнт</a>
+<a href="#section-9">9. Авторизація — це не тільки login</a>
+<a href="#section-10">10. Перевіряємо не тільки GET</a>
+<a href="#section-11">11. XSS, CSRF, CORS — тепер дивимося на них практично</a>
+<a href="#section-12">12. Перевіряємо, що реально сталося з даними</a>
+<a href="#section-13">13. А що буде, якщо натиснути кнопку двічі?</a>
+<a href="#section-14">14. А якщо відповідь загубилася?</a>
+<a href="#section-15">15. Перевіряємо інтеграції</a>
+<a href="#section-16">16. Помилка теж повинна працювати правильно</a>
+<a href="#section-17">17. Логи — частина тестування</a>
+<a href="#section-18">18. Що буде після Refresh?</a>
+<a href="#section-19">19. Дві вкладки — маленький генератор цікавих багів</a>
+<a href="#section-20">20. Перевіряємо різних користувачів</a>
+<a href="#section-21">21. Не забуваємо про браузер і екран</a>
+<a href="#section-22">22. Регресія: ми тестуємо не тільки те, що змінили</a>
+<a href="#section-23">23. Не все потрібно перевіряти вручну</a>
+<a href="#section-24">24. Практичний checklist</a>
+<a href="#section-25">25. Головна думка</a></nav></details></aside><div class="article-column"><article class="article" aria-label="Як тестувати вебзастосунок: від кнопки в браузері до API та бази даних"><section class="opening" aria-label="Вступ"><div class="eyebrow" aria-hidden="true">Вступ</div><p>Коли ми говоримо: <strong>«сайт протестований»</strong>, що саме це означає?</p><p>Часто перевірка виглядає приблизно так:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Відкрив сайт → авторизувався → натиснув кілька кнопок → дані збереглися → помилок немає → можна релізити.</div></blockquote><p>Але вебзастосунок — це не тільки те, що ми бачимо в браузері.</p><p>За звичайною кнопкою <strong>«Зберегти»</strong> може стояти цілий ланцюжок:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Користувач
+    ↓
+Браузер
+    ↓
+Frontend
+    ↓
+HTTP-запит
+    ↓
+Backend API
+    ↓
+База даних
+    ↓
+Інша система</code></pre></div><p>І проблема може виникнути на будь-якому з цих рівнів.</p><p>Тому сьогодні спробуємо подивитися на тестування вебзастосунку не як на <strong>«поклікати сайт»</strong>, а як на перевірку всієї системи.</p><hr></section><section class="article-section" aria-labelledby="section-1"><div class="section-heading"><span class="section-index" aria-hidden="true">01</span><h2 id="section-1">1. Візьмемо простий приклад</h2></div><p>Уявімо особистий кабінет споживача.</p><p>Користувач може передати показання лічильника.</p><p>В інтерфейсі все дуже просто:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Лічильник №123456
+
+Поточне показання:
+[ 15432 ]
+
+[ Передати показання ]</code></pre></div><p>Користувач вводить:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">15432</code></pre></div><p>натискає кнопку і бачить:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Показання успішно передано</code></pre></div><p>Здається, що тест простий:</p><ol start="1"><li>Ввести число.</li><li>Натиснути кнопку.</li><li>Побачити повідомлення.</li></ol><p>Якщо повідомлення з'явилося — функціональність працює.</p><p>Але насправді ми перевірили лише <strong>один позитивний сценарій</strong>, або так званий <strong>happy path</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-2"><div class="section-heading"><span class="section-index" aria-hidden="true">02</span><h2 id="section-2">2. Починаємо з позитивного сценарію</h2></div><p>Позитивний сценарій потрібен завжди.</p><p>Спочатку потрібно переконатися, що система взагалі виконує свою основну функцію.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Користувач авторизувався
+        ↓
+Відкрив свій лічильник
+        ↓
+Ввів коректне показання
+        ↓
+Натиснув &quot;Передати&quot;
+        ↓
+Отримав повідомлення про успіх
+        ↓
+Показання з'явилося в історії</code></pre></div><p>Це хороший початок.</p><p>Але <strong>це тільки початок тестування</strong>.</p><p>Тепер спробуємо зробити щось не так.</p><hr></section><section class="article-section" aria-labelledby="section-3"><div class="section-heading"><span class="section-index" aria-hidden="true">03</span><h2 id="section-3">3. Негативні сценарії</h2></div><p>Якщо система очікує число, потрібно перевірити не тільки правильне число.</p><p>Що буде, якщо передати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">порожнє значення
+0
+-100
+999999999999999
+15.5
+&quot;hello&quot;
+&quot;&lt;script&gt;&quot;</code></pre></div><p>Або вставити пробіли:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">&quot; 15432 &quot;</code></pre></div><p>Або дуже довгий рядок.</p><p>Хороший тестувальник перевіряє не тільки:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Чи працює система, коли користувач робить усе правильно?</div></blockquote><p>А й:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Що станеться, коли користувач, браузер або інша система передасть те, чого ми не очікували?</div></blockquote><hr></section><section class="article-section" aria-labelledby="section-4"><div class="section-heading"><span class="section-index" aria-hidden="true">04</span><h2 id="section-4">4. Frontend validation — це ще не перевірка системи</h2></div><p>Frontend може не дозволяти вводити неправильні дані.</p><p>Наприклад:</p><div class="code-block"><div class="code-toolbar"><span>HTML</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-html">&lt;input type=<span class="str">&quot;number&quot;</span> max=<span class="str">&quot;99999&quot;</span>&gt;</code></pre></div><p>У браузері все виглядає добре.</p><p>Користувач не може ввести:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">hello</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">999999999</code></pre></div><p>Але frontend — це лише клієнт.</p><p>Запит до API можна відправити без вашого інтерфейсу.</p><p>Наприклад:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">POST</span> /api/meters/<span class="num">123</span>/readings
+Content-Type: application/json
+
+{
+    <span class="str">&quot;value&quot;</span>: <span class="num">999999999</span>
+}</code></pre></div><p>Якщо backend прийняв це значення — frontend validation нас не врятувала.</p><p>Тому важливе правило:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Усе, що приходить від клієнта, backend повинен перевіряти самостійно.</strong></div></blockquote><p>Frontend validation покращує UX.</p><p>Backend validation захищає дані та бізнес-логіку.</p><hr></section><section class="article-section" aria-labelledby="section-5"><div class="section-heading"><span class="section-index" aria-hidden="true">05</span><h2 id="section-5">5. Відкриваємо DevTools</h2></div><p>Один із найкорисніших інструментів під час тестування вебзастосунку вже знаходиться у браузері.</p><p>Відкриваємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">F12 → Network</code></pre></div><p>Натискаємо <strong>«Передати показання»</strong> і дивимося, що реально відбулося.</p><p>Можемо побачити приблизно такий запит:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">POST</span> /api/meters/<span class="num">123</span>/readings HTTP/<span class="num">1.1</span>
+Content-Type: application/json
+Authorization: Bearer eyJ...
+
+{
+    <span class="str">&quot;value&quot;</span>: <span class="num">15432</span>
+}</code></pre></div><p>А сервер відповідає:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http">HTTP/<span class="num">1.1</span> <span class="num">201</span> Created
+Content-Type: application/json
+
+{
+    <span class="str">&quot;id&quot;</span>: <span class="num">84721</span>,
+    <span class="str">&quot;meterId&quot;</span>: <span class="num">123</span>,
+    <span class="str">&quot;value&quot;</span>: <span class="num">15432</span>
+}</code></pre></div><p>Тепер ми бачимо значно більше.</p><p>Можемо перевірити:</p><ul><li>URL;</li><li>HTTP method;</li><li>request headers;</li><li>request body;</li><li>cookies;</li><li>authorization;</li><li>response body;</li><li>HTTP status;</li><li>час виконання запиту.</li></ul><p>І тут тестування переходить з рівня <strong>«кнопка працює»</strong> на рівень розуміння того, <strong>як працює система</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-6"><div class="section-heading"><span class="section-index" aria-hidden="true">06</span><h2 id="section-6">6. HTTP status теж потрібно перевіряти</h2></div><p>Уявімо ситуацію.</p><p>Backend повернув:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http">HTTP/<span class="num">1.1</span> <span class="num">500</span> Internal Server Error</code></pre></div><p>але frontend через помилку показав:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Показання успішно передано</code></pre></div><p>Якщо дивитися тільки на UI, можна вирішити, що все працює.</p><p>Тому потрібно дивитися і на HTTP.</p><p>Наприклад:</p><div class="table-scroll" tabindex="0" role="region" aria-label="Таблиця"><table><thead><tr><th scope="col">Ситуація</th><th scope="col">Можлива відповідь</th></tr></thead><tbody><tr><td>Показання створено</td><td><code>201 Created</code></td></tr><tr><td>Некоректний запит</td><td><code>400 Bad Request</code></td></tr><tr><td>Користувач не автентифікований</td><td><code>401 Unauthorized</code></td></tr><tr><td>Немає необхідного доступу</td><td><code>403 Forbidden</code></td></tr><tr><td>Лічильник не знайдений</td><td><code>404 Not Found</code></td></tr><tr><td>Конфлікт зі станом ресурсу</td><td><code>409 Conflict</code></td></tr><tr><td>Дані не проходять семантичну валідацію</td><td><code>422 Unprocessable Content</code></td></tr><tr><td>Неочікувана помилка сервера</td><td><code>500 Internal Server Error</code></td></tr></tbody></table></div><p>Конкретні коди залежать від контракту API.</p><p>Важливо не просто отримати <strong>«якусь помилку»</strong>, а перевірити, що API поводиться передбачувано і відповідно до контракту.</p><hr></section><section class="article-section" aria-labelledby="section-7"><div class="section-heading"><span class="section-index" aria-hidden="true">07</span><h2 id="section-7">7. А тепер обійдемо UI</h2></div><p>Якщо ми знаємо endpoint:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">POST /api/meters/123/readings</code></pre></div><p>ми можемо перевірити його окремо через Postman, Bruno, Swagger UI або інший API-клієнт.</p><p>Наприклад:</p><div class="code-block"><div class="code-toolbar"><span>JSON</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-json">{
+    <span class="str">&quot;value&quot;</span>: <span class="kw">null</span>
+}</code></pre></div><p>потім:</p><div class="code-block"><div class="code-toolbar"><span>JSON</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-json">{
+    <span class="str">&quot;value&quot;</span>: -<span class="num">100</span>
+}</code></pre></div><p>потім:</p><div class="code-block"><div class="code-toolbar"><span>JSON</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-json">{
+    <span class="str">&quot;value&quot;</span>: <span class="str">&quot;hello&quot;</span>
+}</code></pre></div><p>потім:</p><div class="code-block"><div class="code-toolbar"><span>JSON</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-json">{
+    <span class="str">&quot;value&quot;</span>: <span class="num">999999999999999</span>
+}</code></pre></div><p>UI міг ніколи не дозволити сформувати такі запити.</p><p>А API — може їх отримати.</p><p>Це принципова різниця між:</p><p><strong>тестуванням інтерфейсу</strong></p><p>та</p><p><strong>тестуванням системи</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-8"><div class="section-heading"><span class="section-index" aria-hidden="true">08</span><h2 id="section-8">8. Не довіряємо ID, який передав клієнт</h2></div><p>Подивимося ще раз на наш URL:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">POST</span> /api/meters/<span class="num">123</span>/readings</code></pre></div><p><code>123</code> — ID лічильника.</p><p>Припустимо, це мій лічильник.</p><p>А що буде, якщо я зміню:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">123</code></pre></div><p>на:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">124</code></pre></div><p>і відправлю:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">POST</span> /api/meters/<span class="num">124</span>/readings</code></pre></div><p>Якщо <code>124</code> належить іншому користувачу, сервер повинен перевірити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Хто виконує запит?
+        ↓
+Чи має цей користувач доступ до meterId=124?
+        ↓
+Так → продовжуємо
+Ні  → відмовляємо</code></pre></div><p>Сам факт того, що користувач знає ID об'єкта, <strong>не дає йому права працювати з ним</strong>.</p><p>Саме тут під час тестування починають проявлятися проблеми класу <strong>IDOR / Broken Object Level Authorization</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-9"><div class="section-heading"><span class="section-index" aria-hidden="true">09</span><h2 id="section-9">9. Авторизація — це не тільки login</h2></div><p>Ще одна поширена помилка:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Користувач авторизований, отже він може виконувати запит.</div></blockquote><p>Ні.</p><p>Authentication відповідає на питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Хто ти?</strong></div></blockquote><p>Authorization:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Що тобі дозволено робити?</strong></div></blockquote><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">User A → meter 123
+User B → meter 124
+Admin  → meter 123, 124, ...</code></pre></div><p>Тому варто перевіряти запити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">без токена
+з неправильним токеном
+з простроченим токеном
+з токеном іншого користувача
+з недостатньою роллю
+з правильним токеном</code></pre></div><p>Причому перевіряти це потрібно на backend.</p><p>Прихована кнопка у frontend — <strong>не контроль доступу</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-10"><div class="section-heading"><span class="section-index" aria-hidden="true">10</span><h2 id="section-10">10. Перевіряємо не тільки GET</h2></div><p>Часто права перевіряють приблизно так:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">GET</span> /api/meters/<span class="num">123</span></code></pre></div><p>Чужий лічильник отримати не можна.</p><p>Добре.</p><p>А що з:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">POST</span>
+<span class="kw">PUT</span>
+<span class="kw">PATCH</span>
+<span class="kw">DELETE</span></code></pre></div><p>Наприклад:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">DELETE</span> /api/meters/<span class="num">123</span></code></pre></div><p>може використовувати зовсім іншу backend-логіку.</p><p>Тому доступ потрібно перевіряти для <strong>кожної операції</strong>, а не тільки для перегляду даних.</p><hr></section><section class="article-section" aria-labelledby="section-11"><div class="section-heading"><span class="section-index" aria-hidden="true">11</span><h2 id="section-11">11. XSS, CSRF, CORS — тепер дивимося на них практично</h2></div><p>Ми вже можемо знати, що таке XSS, CSRF та CORS.</p><p>Тепер питання інше:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Де їх шукати під час тестування конкретного застосунку?</strong></div></blockquote><p>Наприклад, є поле:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Коментар</code></pre></div><p>Спробували ввести дані, які містять HTML/JavaScript.</p><p>Потрібно перевірити не тільки момент збереження.</p><p>Коментар може потім відображатися:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">в особистому кабінеті
+в адміністративній панелі
+в історії
+у звіті
+в іншому застосунку</code></pre></div><p>Тобто небезпечне значення може бути <strong>збережене зараз, а проявитися пізніше в іншому місці</strong>.</p><p>Для cookie-based authentication окремо дивимося на CSRF-захист, <code>SameSite</code>, CSRF-токени та критичні state-changing операції.</p><p>А якщо frontend і API знаходяться на різних origin — перевіряємо CORS.</p><hr></section><section class="article-section" aria-labelledby="section-12"><div class="section-heading"><span class="section-index" aria-hidden="true">12</span><h2 id="section-12">12. Перевіряємо, що реально сталося з даними</h2></div><p>Повернемося до повідомлення:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Показання успішно передано</code></pre></div><p>Що означає <strong>«успішно»</strong>?</p><p>Frontend отримав <code>200/201</code>?</p><p>Backend виконав операцію?</p><p>Дані записалися в БД?</p><p>У БД вони правильні?</p><p>Інтеграція отримала їх?</p><p>Уявімо запис:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">reading_id: 84721
+meter_id:   123
+value:      15432
+created_by: 567
+status:     NEW</code></pre></div><p>Варто перевірити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">meter_id правильний?
+value правильний?
+created_by правильний?
+час правильний?
+status правильний?
+запис один?</code></pre></div><p>Особливо цікаве останнє питання.</p><hr></section><section class="article-section" aria-labelledby="section-13"><div class="section-heading"><span class="section-index" aria-hidden="true">13</span><h2 id="section-13">13. А що буде, якщо натиснути кнопку двічі?</h2></div><p>Користувач натиснув:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">[ Передати ]</code></pre></div><p>Сайт задумався.</p><p>Через секунду користувач натиснув ще раз.</p><p>У Network бачимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">POST /readings
+POST /readings</code></pre></div><p>Що буде в БД?</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">84721 | meter=123 | value=15432
+84722 | meter=123 | value=15432</code></pre></div><p>Це нормально?</p><p>Можливо.</p><p>А можливо — серйозна помилка.</p><p>Для показань це залежить від бізнес-правил.</p><p>А тепер замінимо операцію:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Передати показання</code></pre></div><p>на:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Оплатити 500 грн</code></pre></div><p>Тепер повторна операція вже може мати зовсім інші наслідки.</p><p>Саме тому під час тестування важливо перевіряти <strong>повторні запити та ідемпотентність</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-14"><div class="section-heading"><span class="section-index" aria-hidden="true">14</span><h2 id="section-14">14. А якщо відповідь загубилася?</h2></div><p>Ще цікавіший сценарій:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Client
+   │
+   │ POST /payment
+   ▼
+Server
+   │
+   │ платіж виконано
+   ▼
+Database
+
+Server
+   │
+   X ← connection lost
+
+Client не отримав response</code></pre></div><p>Для клієнта результат невідомий.</p><p>Він повторює:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">POST</span> /payment</code></pre></div><p>Що тепер?</p><p>Саме такі сценарії показують, чому недостатньо тестувати систему лише за нормального з'єднання та ідеальних умов.</p><hr></section><section class="article-section" aria-labelledby="section-15"><div class="section-heading"><span class="section-index" aria-hidden="true">15</span><h2 id="section-15">15. Перевіряємо інтеграції</h2></div><p>Наш backend не обов'язково працює сам.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Browser
+   ↓
+Frontend
+   ↓
+Backend
+   ↓
+Billing
+   ↓
+Database</code></pre></div><p>У happy path:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Billing → 200 OK</code></pre></div><p>А що буде, якщо Billing поверне:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">400
+401
+404
+500
+503</code></pre></div><p>Або взагалі не відповість?</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">timeout</code></pre></div><p>Що робить наша система?</p><p>Показує користувачу зрозумілу помилку?</p><p>Повторює запит?</p><p>Ставить операцію в чергу?</p><p>Записує дані в БД?</p><p>Відкочує транзакцію?</p><p>Залишає операцію в проміжному статусі?</p><p>Це вже перевірка не окремої кнопки, а <strong>поведінки системи при частковій відмові</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-16"><div class="section-heading"><span class="section-index" aria-hidden="true">16</span><h2 id="section-16">16. Помилка теж повинна працювати правильно</h2></div><p>Ми часто перевіряємо успішний результат:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">200 OK</code></pre></div><p>Але помилка — теж результат роботи системи.</p><p>Користувач не повинен бачити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">NullReferenceException at MeterService.cs:184</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">SQLSTATE[23000]</code></pre></div><p>або stack trace.</p><p>Краще:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Не вдалося передати показання.
+Спробуйте ще раз пізніше.</code></pre></div><p>При цьому в логах має залишитися достатньо інформації, щоб команда могла зрозуміти причину.</p><p>Тобто:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Користувач → зрозуміле повідомлення
+Розробник  → технічна інформація в логах</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-17"><div class="section-heading"><span class="section-index" aria-hidden="true">17</span><h2 id="section-17">17. Логи — частина тестування</h2></div><p>Припустимо, API повернув:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="num">500</span> Internal Server Error</code></pre></div><p>Що робимо далі?</p><p>Якщо система нормально логуються, можна знайти операцію, наприклад, за <code>correlationId</code>:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Request ID: a84f72...
+User: 567
+Endpoint: POST /api/meters/123/readings
+Result: ERROR</code></pre></div><p>А потім простежити її далі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Frontend
+   ↓
+API Gateway
+   ↓
+Meter Service
+   ↓
+Billing</code></pre></div><p>Тому під час тестування корисно перевіряти не тільки <strong>чи виникла помилка</strong>, а й:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Чи зможемо ми зрозуміти, що сталося, коли ця помилка виникне в PROD?</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-18"><div class="section-heading"><span class="section-index" aria-hidden="true">18</span><h2 id="section-18">18. Що буде після Refresh?</h2></div><p>Дуже простий тест, який іноді знаходить цікаві проблеми.</p><p>Виконали операцію:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Передали показання</code></pre></div><p>Натиснули:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">F5</code></pre></div><p>Що сталося?</p><p>Дані просто перечиталися?</p><p>Запит повторився?</p><p>Операція виконалася вдруге?</p><p>Так само варто перевірити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Back
+Forward
+нова вкладка
+дві вкладки одночасно
+повторне відкриття URL
+закінчення сесії</code></pre></div><p>Це звичайна поведінка користувача, а не якийсь екзотичний сценарій.</p><hr></section><section class="article-section" aria-labelledby="section-19"><div class="section-heading"><span class="section-index" aria-hidden="true">19</span><h2 id="section-19">19. Дві вкладки — маленький генератор цікавих багів</h2></div><p>Відкриваємо один об'єкт у двох вкладках.</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TAB 1                    TAB 2
+
+value = 100              value = 100
+
+змінюємо → 110           змінюємо → 120
+
+SAVE                      SAVE</code></pre></div><p>Яке значення залишиться?</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">110?
+120?
+помилка конфлікту?</code></pre></div><p>А що має залишитися згідно з бізнес-логікою?</p><p>Це вже питання конкурентних змін та контролю версії даних.</p><hr></section><section class="article-section" aria-labelledby="section-20"><div class="section-heading"><span class="section-index" aria-hidden="true">20</span><h2 id="section-20">20. Перевіряємо різних користувачів</h2></div><p>Не варто тестувати всю систему тільки під одним адміністратором.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Guest
+User
+Operator
+Manager
+Administrator</code></pre></div><p>Для кожної ролі можуть бути різні:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">сторінки
+кнопки
+API
+дані
+операції</code></pre></div><p>Причому недостатньо перевірити:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Кнопки немає.</div></blockquote><p>Потрібно перевірити:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>А якщо користувач вручну викличе API цієї кнопки?</div></blockquote><p>Знову повертаємося до правила:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Frontend приховує функцію. Backend контролює доступ.</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-21"><div class="section-heading"><span class="section-index" aria-hidden="true">21</span><h2 id="section-21">21. Не забуваємо про браузер і екран</h2></div><p>Після всього цього UI все одно потрібно тестувати.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Chrome
+Edge
+Firefox
+Safari</code></pre></div><p>але набір браузерів повинен визначатися вимогами та реальною аудиторією продукту.</p><p>Так само перевіряємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Desktop
+Tablet
+Mobile</code></pre></div><p>Якщо застосунок адаптивний.</p><p>Окремо варто дивитися:</p><ul><li>довгі тексти;</li><li>локалізацію;</li><li>масштабування;</li><li>таблиці;</li><li>модальні вікна;</li><li>повідомлення про помилки;</li><li>повільне завантаження.</li></ul><hr></section><section class="article-section" aria-labelledby="section-22"><div class="section-heading"><span class="section-index" aria-hidden="true">22</span><h2 id="section-22">22. Регресія: ми тестуємо не тільки те, що змінили</h2></div><p>Припустимо, розробник змінив:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Передачу показань</code></pre></div><p>Логічно перевірити цю функцію.</p><p>Але ці дані можуть використовувати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Історія показань
+        ↓
+Графік
+        ↓
+Billing
+        ↓
+Мобільний застосунок
+        ↓
+Звіти</code></pre></div><p>Тому зміна одного endpoint може вплинути на кілька функцій.</p><p>Це і є одна з причин регресійного тестування.</p><p>Потрібно запитувати:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Що ще могло змінитися через цю зміну?</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-23"><div class="section-heading"><span class="section-index" aria-hidden="true">23</span><h2 id="section-23">23. Не все потрібно перевіряти вручну</h2></div><p>Після такого списку може виникнути логічне питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Це ж скільки часу потрібно на один реліз?</div></blockquote><p>Саме тому існує автоматизація тестування.</p><p>Умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">        E2E
+       /   \
+ Integration
+ /         \
+API tests
+─────────────
+ Unit tests</code></pre></div><p>Unit-тести можуть швидко перевіряти окрему бізнес-логіку.</p><p>API-тести — контракт та поведінку endpoint.</p><p>Integration-тести — взаємодію компонентів.</p><p>E2E — ключові користувацькі сценарії через систему.</p><p>Ручне тестування залишається важливим, але людина не повинна перед кожним релізом вручну повторювати сотні однакових перевірок.</p><hr></section><section class="article-section" aria-labelledby="section-24"><div class="section-heading"><span class="section-index" aria-hidden="true">24</span><h2 id="section-24">24. Практичний checklist</h2></div><p>Перед тим як сказати:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>«Функціональність протестована»</strong></div></blockquote><p>корисно пройти хоча б такий список.</p><h4>Функціональність</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Happy path працює
+□ Негативні сценарії перевірені
+□ Граничні значення перевірені
+□ Обов'язкові поля перевірені
+□ Бізнес-правила виконуються</code></pre></div><h4>Frontend</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ UI правильно відображає результат
+□ Помилки зрозумілі користувачу
+□ Подвійне натискання обробляється
+□ Refresh / Back / Forward не створюють проблем
+□ Перевірені необхідні браузери та розміри екрана</code></pre></div><h4>API</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Method правильний
+□ Request відповідає контракту
+□ Response відповідає контракту
+□ HTTP status правильний
+□ Backend самостійно валідовує дані
+□ Некоректні параметри обробляються</code></pre></div><h4>Authentication / Authorization</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Запит без authentication перевірений
+□ Прострочена/некоректна сесія або token перевірені
+□ Ролі перевірені
+□ Доступ до чужих об'єктів перевірений
+□ Backend перевіряє authorization</code></pre></div><h4>Security</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Перевірені потенційні XSS-точки
+□ Перевірений CSRF там, де він релевантний
+□ Перевірені object-level permissions / IDOR
+□ CORS налаштований відповідно до архітектури
+□ Технічні помилки не розкривають зайву інформацію</code></pre></div><h4>Дані</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Дані реально записані
+□ Дані записані правильно
+□ Немає неочікуваних дублікатів
+□ Повторний запит перевірений
+□ Конкурентні зміни враховані</code></pre></div><h4>Інтеграції</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Успішна відповідь перевірена
+□ Помилка зовнішньої системи перевірена
+□ Timeout перевірений
+□ Повторний запит не створює неконсистентних даних</code></pre></div><h4>Експлуатація</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Помилки логуються
+□ Є можливість знайти проблемний запит
+□ Логи не містять зайвих секретів
+□ Систему можна діагностувати після релізу</code></pre></div><h4>Регресія</h4><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">□ Визначено, на що могла вплинути зміна
+□ Критичні суміжні сценарії перевірені
+□ Автоматизовані тести пройшли</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-25"><div class="section-heading"><span class="section-index" aria-hidden="true">25</span><h2 id="section-25">25. Головна думка</h2></div><p>Тестування вебзастосунку — це не перевірка того, <strong>чи натискається кнопка</strong>.</p><p>Це перевірка всього сценарію:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Користувач
+    ↓
+UI
+    ↓
+HTTP
+    ↓
+Authentication
+    ↓
+Authorization
+    ↓
+API
+    ↓
+Validation
+    ↓
+Business Logic
+    ↓
+Database
+    ↓
+Integration
+    ↓
+Logs</code></pre></div><p>І для кожного рівня потрібно поставити два питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Що повинно відбутися, якщо все добре?</strong></div></blockquote><p>і</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Що повинно відбутися, якщо щось піде не так?</strong></div></blockquote><p>Саме друге питання часто знаходить найбільш цікаві помилки.</p><p>Тому наступного разу, коли після тестування хтось скаже:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>«Я поклікав — усе працює».</strong></div></blockquote><p>можна поставити лише одне запитання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>А що саме ти перевірив?</strong></div></blockquote></section></article><div class="joker-signature" aria-label="Автор матеріалу Joker"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"><div class="joker-signature-copy"><span class="joker-signature-label">Автор матеріалу · <strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span><span class="joker-signature-note">IT / ПРАКТИКА · Технічні нотатки</span></div></div><footer class="end-note"><span>IT / ПРАКТИКА · 022</span><a href="#top">До початку ↑</a></footer></div></div></main><div class="status" role="status" aria-live="polite"></div></div><script src="assets/js/a2d9670c171975b9f70c.js"></script><script src="assets/js/a39bc17204fe1b6a9715.js"></script><!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"4548d06d74724c949f10a8a96bb207e1"}'></script><!-- End Cloudflare Web Analytics --></body></html>
