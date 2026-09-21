@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Локальний AI без магії: GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер · IT / Практика</title><link rel="stylesheet" href="assets/css/203500caefe7e9acaff9.css"><link rel="stylesheet" href="assets/css/48521fa8a1a6390a5b3b.css"><link rel="icon" type="image/png" href="assets/images/joker-cube-logo-v1.png"><link rel="canonical" href="https://j0ker777.github.io/TechHub/024-lokalnyi-ai-bez-mahiyi-gpu-vram-kvantyzatsiya-i-yak-zrozumity-yaku-model-potyahn.html"><meta name="description" content="У першій частині ми розібралися, що означають: Припустимо, ми вже вибрали модель. Наприклад: І хочемо запустити її локально. Виникає наступне питання: Чи вистачить: Чому 32B модель може потребувати близько 64 GB пам'яті, але після…"><meta property="og:title" content="Локальний AI без магії: GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер"><meta property="og:description" content="У першій частині ми розібралися, що означають: Припустимо, ми вже вибрали модель. Наприклад: І хочемо запустити її локально. Виникає наступне питання: Чи вистачить: Чому 32B модель може потребувати близько 64 GB пам'яті, але після…"><meta property="og:type" content="article"><meta property="og:url" content="https://j0ker777.github.io/TechHub/024-lokalnyi-ai-bez-mahiyi-gpu-vram-kvantyzatsiya-i-yak-zrozumity-yaku-model-potyahn.html"><meta property="og:image" content="https://j0ker777.github.io/TechHub/assets/previews/024-lokalnyi-ai-bez-mahiyi-gpu-vram-kvantyzatsiya-i-yak-zrozumity-yaku-model-potyahn-og-v2.jpg"><meta property="og:image:secure_url" content="https://j0ker777.github.io/TechHub/assets/previews/024-lokalnyi-ai-bez-mahiyi-gpu-vram-kvantyzatsiya-i-yak-zrozumity-yaku-model-potyahn-og-v2.jpg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="675"><meta property="og:image:alt" content="Обкладинка: Локальний AI без магії: GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер"><meta property="og:site_name" content="TechHub · Joker"><meta property="og:locale" content="uk_UA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Локальний AI без магії: GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер"><meta name="twitter:description" content="У першій частині ми розібралися, що означають: Припустимо, ми вже вибрали модель. Наприклад: І хочемо запустити її локально. Виникає наступне питання: Чи вистачить: Чому 32B модель може потребувати близько 64 GB пам'яті, але після…"><meta name="twitter:image" content="https://j0ker777.github.io/TechHub/assets/previews/024-lokalnyi-ai-bez-mahiyi-gpu-vram-kvantyzatsiya-i-yak-zrozumity-yaku-model-potyahn-og-v2.jpg"></head><body id="top"><input class="theme-input" id="theme-toggle" type="checkbox" aria-label="Світла тема"><div class="site"><div class="reading-progress" aria-hidden="true"></div><header><div class="topbar"><div class="masthead"><a class="joker-home-link" href="index.html" aria-label="На головну сторінку TechHub"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"></a><div class="joker-brand-copy"><div><a class="brand" href="#top">IT <b>/</b> ПРАКТИКА</a><span class="edition-note">ТЕХНІЧНІ НОТАТКИ</span></div><span class="joker-byline">Автор матеріалу ·&nbsp;<strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span></div></div><div class="actions"><div class="auth-profile" data-auth-profile hidden><span class="auth-profile-picture"><span class="auth-profile-fallback" data-auth-fallback aria-hidden="true"></span><img class="auth-profile-avatar" data-auth-avatar alt="" width="34" height="34" referrerpolicy="no-referrer" hidden></span><span class="auth-profile-name" data-auth-name></span><button class="auth-profile-logout" data-auth-logout type="button">Вийти</button></div><label class="theme" for="theme-toggle"><span class="theme-dark-label">Світла тема</span><span class="theme-light-label">Темна тема</span></label></div></div></header><main><div class="hero"><div class="eyebrow">Архітектура / IT-практика</div><div class="hero-intro"><h1><span class="headline-topic">Локальний AI без магії:</span> <span class="headline-text">GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер</span></h1><div class="issue-number" aria-hidden="true"><b>024</b><span>ВИПУСК / 024</span></div></div><div class="meta"><span class="pill">IT / ПРАКТИКА</span><span>№ 024</span><span>~ 21–23 хв читання</span></div><figure class="cover"><img src="assets/images/024-lokalnyi-ai-bez-mahiyi-gpu-vram-kvantyzatsiya-i-yak-zrozumity-yaku-model-potyahn.png" width="1672" height="941" alt="Обкладинка: Локальний AI без магії: GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер"></figure></div><div class="layout"><aside class="sidebar" aria-label="Зміст статті"><details open><summary>У ЦІЙ СТАТТІ</summary><nav><a href="#section-1">1. Де взагалі працює локальна LLM?</a>
+<a href="#section-2">2. Параметри моделі займають пам'ять</a>
+<a href="#section-3">3. FP32</a>
+<a href="#section-4">4. FP16</a>
+<a href="#section-5">5. BF16</a>
+<a href="#section-6">6. FP8 та INT8</a>
+<a href="#section-7">7. Quantization</a>
+<a href="#section-8">8. Q8, Q6, Q5, Q4</a>
+<a href="#section-9">9. Що таке Q4_K_M?</a>
+<a href="#section-10">10. Приклад з 32B</a>
+<a href="#section-11">11. Ваги — це не все</a>
+<a href="#section-12">12. Що таке VRAM?</a>
+<a href="#section-13">13. VRAM визначає не швидкість, а передусім місткість</a>
+<a href="#section-14">14. Що таке KV Cache?</a>
+<a href="#section-15">15. Context впливає на пам'ять</a>
+<a href="#section-16">16. Максимальний Context не потрібно виставляти завжди</a>
+<a href="#section-17">17. Груба формула VRAM</a>
+<a href="#section-18">18. А якщо VRAM не вистачає?</a>
+<a href="#section-19">19. Модель запустилася ≠ модель працює комфортно</a>
+<a href="#section-20">20. RAM теж важлива</a>
+<a href="#section-21">21. CPU теж нікуди не зникає</a>
+<a href="#section-22">22. Що таке GGUF?</a>
+<a href="#section-23">23. GPU — це не просто «24 GB»</a>
+<a href="#section-24">24. Memory Bandwidth</a>
+<a href="#section-25">25. Чому bandwidth такий важливий для LLM?</a>
+<a href="#section-26">26. Теоретична оцінка через bandwidth</a>
+<a href="#section-27">27. CUDA Cores</a>
+<a href="#section-28">28. Tensor Cores</a>
+<a href="#section-29">29. Чому підтримка FP8 може бути важливою?</a>
+<a href="#section-30">30. TFLOPS — теж не вся правда</a>
+<a href="#section-31">31. Дві карти з 24 GB можуть бути дуже різними</a>
+<a href="#section-32">32. Що таке tokens/sec?</a>
+<a href="#section-33">33. Time To First Token</a>
+<a href="#section-34">34. Prompt Processing та Generation — різні речі</a>
+<a href="#section-35">35. Один користувач і 100 користувачів — різні задачі</a>
+<a href="#section-36">36. 8 GB VRAM</a>
+<a href="#section-37">37. 12 GB VRAM</a>
+<a href="#section-38">38. 16 GB VRAM</a>
+<a href="#section-39">39. 24 GB VRAM</a>
+<a href="#section-40">40. 48 GB VRAM</a>
+<a href="#section-41">41. 80 GB VRAM</a>
+<a href="#section-42">42. Орієнтовна таблиця</a>
+<a href="#section-43">43. Multi-GPU</a>
+<a href="#section-44">44. Чому Multi-GPU не дає автоматично ×2 швидкості?</a>
+<a href="#section-45">45. MoE і пам'ять</a>
+<a href="#section-46">46. Реальний приклад вибору</a>
+<a href="#section-47">47. Крок 1 — визначаємо клас моделей</a>
+<a href="#section-48">48. Крок 2 — визначаємо Context</a>
+<a href="#section-49">49. Крок 3 — дивимося Quantization</a>
+<a href="#section-50">50. Крок 4 — дивимося реальний файл</a>
+<a href="#section-51">51. Крок 5 — залишаємо запас</a>
+<a href="#section-52">52. Крок 6 — запускаємо</a>
+<a href="#section-53">53. Крок 7 — перевіряємо якість</a>
+<a href="#section-54">54. Найбільша модель — не завжди правильна мета</a>
+<a href="#section-55">55. Домашній AI та серверний AI</a>
+<a href="#section-56">56. Що потрібно дивитися при виборі GPU</a>
+<a href="#section-57">57. Як читати характеристики моделі</a>
+<a href="#section-58">58. Повний алгоритм</a>
+<a href="#section-59">59. Шпаргалка</a>
+<a href="#section-60">Висновок</a></nav></details></aside><div class="article-column"><article class="article" aria-label="Локальний AI без магії: GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер"><section class="opening" aria-label="Вступ"><div class="eyebrow" aria-hidden="true">Вступ</div><p>У першій частині ми розібралися, що означають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">7B
+14B
+32B
+70B
+Dense
+MoE
+Instruct
+Context
+Reasoning
+Multimodal</code></pre></div><p>Припустимо, ми вже вибрали модель.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B Instruct
+128K Context</code></pre></div><p>І хочемо запустити її локально.</p><p>Виникає наступне питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Яке обладнання для цього потрібне?</strong></div></blockquote><p>Чи вистачить:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">8 GB VRAM?
+16 GB?
+24 GB?
+48 GB?</code></pre></div><p>Чому 32B модель може потребувати близько 64 GB пам'яті, але після квантизації запускатися на значно меншому GPU?</p><p>Що означають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">FP32
+FP16
+BF16
+FP8
+INT8
+Q8
+Q5
+Q4
+GGUF
+KV Cache
+Memory Bandwidth
+Tensor Cores
+tokens/sec</code></pre></div><p>І чому дві відеокарти з однаковими 24 GB VRAM можуть давати зовсім різну швидкість?</p><p>Розберемося.</p><hr></section><section class="article-section" aria-labelledby="section-1"><div class="section-heading"><span class="section-index" aria-hidden="true">01</span><h2 id="section-1">1. Де взагалі працює локальна LLM?</h2></div><p>Дуже спрощено локальний AI виглядає так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     │
+     ▼
+AI Runtime
+     │
+     ▼
+Model
+     │
+     ▼
+CPU / GPU</code></pre></div><p>Runtime — це програмне забезпечення, яке безпосередньо запускає модель.</p><p>У локальних системах можна зустріти, наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">llama.cpp
+Ollama
+LM Studio
+vLLM
+Transformers</code></pre></div><p>Вони вирішують одну фундаментальну задачу:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Завантажити модель у пам'ять та виконувати її обчислення.</div></blockquote><p>Але для цього моделі спочатку потрібно десь розмістити свої параметри.</p><hr></section><section class="article-section" aria-labelledby="section-2"><div class="section-heading"><span class="section-index" aria-hidden="true">02</span><h2 id="section-2">2. Параметри моделі займають пам'ять</h2></div><p>У першій частині ми говорили:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">7B
+14B
+32B
+70B</code></pre></div><p><code>B</code> означає мільярди параметрів.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B
+≈
+32 000 000 000 параметрів</code></pre></div><p>А кожен параметр потрібно представити числом.</p><p>Якщо один параметр займає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">4 bytes</code></pre></div><p>то:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32 000 000 000 × 4
+≈
+128 GB</code></pre></div><p>І тут ми приходимо до поняття <strong>precision</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-3"><div class="section-heading"><span class="section-index" aria-hidden="true">03</span><h2 id="section-3">3. FP32</h2></div><p>FP32 означає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Floating Point 32-bit</code></pre></div><p>На один параметр потрібно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32 bit
+=
+4 bytes</code></pre></div><p>Тому груба оцінка для 32B:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B × 4 bytes
+≈
+128 GB</code></pre></div><p>Для 70B:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">70B × 4 bytes
+≈
+280 GB</code></pre></div><p>І це лише ваги.</p><p>Очевидно, що для локального inference такі цифри швидко стають незручними.</p><hr></section><section class="article-section" aria-labelledby="section-4"><div class="section-heading"><span class="section-index" aria-hidden="true">04</span><h2 id="section-4">4. FP16</h2></div><p>Можна використовувати меншу точність:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">FP16</code></pre></div><p>тобто:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">16 bit
+=
+2 bytes</code></pre></div><p>Тоді:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B × 2
+≈
+64 GB</code></pre></div><p>А:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">70B × 2
+≈
+140 GB</code></pre></div><p>Ми вже зменшили вимоги до пам'яті приблизно вдвічі.</p><hr></section><section class="article-section" aria-labelledby="section-5"><div class="section-heading"><span class="section-index" aria-hidden="true">05</span><h2 id="section-5">5. BF16</h2></div><p>Ще один формат, який часто зустрічається:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">BF16</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">bfloat16</code></pre></div><p>Він також використовує 16 біт.</p><p>Тобто з погляду грубого розрахунку пам'яті:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">FP16
+≈
+2 bytes / parameter
+
+BF16
+≈
+2 bytes / parameter</code></pre></div><p>Але FP16 та BF16 по-різному розподіляють біти між діапазоном значень та точністю.</p><p>Для нашої теми головне:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>FP16 і BF16 займають приблизно однаковий обсяг пам'яті, але це різні числові формати.</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-6"><div class="section-heading"><span class="section-index" aria-hidden="true">06</span><h2 id="section-6">6. FP8 та INT8</h2></div><p>Можна піти далі.</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">8 bit
+=
+1 byte</code></pre></div><p>Теоретично:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B × 1 byte
+≈
+32 GB</code></pre></div><p>Для 70B:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">70B × 1 byte
+≈
+70 GB</code></pre></div><p>Але зменшення кількості бітів означає, що ми можемо представляти числа менш точно.</p><p>І тут ми приходимо до одного з найважливіших понять локальних LLM.</p><hr></section><section class="article-section" aria-labelledby="section-7"><div class="section-heading"><span class="section-index" aria-hidden="true">07</span><h2 id="section-7">7. Quantization</h2></div><p><strong>Quantization — квантизація.</strong></p><p>Дуже спрощено:</p><p>ми беремо ваги моделі з високою точністю:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">0.13742851
+-0.82719431
+1.29384711</code></pre></div><p>і представляємо їх менш точно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">0.14
+-0.83
+1.29</code></pre></div><p>Реальні алгоритми квантизації значно складніші, але принцип такий:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">менше precision
+      ↓
+менше пам'яті
+      ↓
+менше даних потрібно читати
+      ↓
+можлива втрата якості</code></pre></div><p>Саме quantization зробила великі локальні LLM практично доступними на звичайному обладнанні.</p><hr></section><section class="article-section" aria-labelledby="section-8"><div class="section-heading"><span class="section-index" aria-hidden="true">08</span><h2 id="section-8">8. Q8, Q6, Q5, Q4</h2></div><p>У локальних моделях можна побачити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Q8
+Q6
+Q5
+Q4
+Q3
+Q2</code></pre></div><p>Дуже грубо це можна читати так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Q8
+│
+│ більше пам'яті
+│ менше втрат від quantization
+│
+Q6
+│
+Q5
+│
+Q4  ← популярний компроміс
+│
+Q3
+│
+│ менше пам'яті
+│ більший ризик втрати якості
+│
+Q2</code></pre></div><p>Але це <strong>не абсолютна шкала якості</strong>.</p><p>Конкретний результат залежить від:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">моделі
+методу quantization
+задачі
+runtime</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-9"><div class="section-heading"><span class="section-index" aria-hidden="true">09</span><h2 id="section-9">9. Що таке Q4_K_M?</h2></div><p>У GGUF-моделях можна зустріти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Q4_K_M
+Q5_K_M
+Q6_K
+Q8_0</code></pre></div><p>Це вже конкретні схеми квантизації.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Q4_K_M</code></pre></div><p>належить приблизно до 4-бітного класу, але це не означає, що <strong>кожен байт моделі математично перетворюється рівно на 4 біти на параметр</strong>.</p><p>Є:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">scales
+metadata
+blocks
+різні типи tensors</code></pre></div><p>Тому реальний файл буде відрізнятися від найпростішого теоретичного розрахунку.</p><p>Практичне правило:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Дивіться на реальний розмір файлу моделі, а не лише множте параметри на кількість бітів.</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-10"><div class="section-heading"><span class="section-index" aria-hidden="true">10</span><h2 id="section-10">10. Приклад з 32B</h2></div><p>Візьмемо модель:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B</code></pre></div><p>Груба оцінка ваг:</p><div class="table-scroll" tabindex="0" role="region" aria-label="Таблиця"><table><thead><tr><th scope="col">Формат</th><th scope="col">Теоретичний розмір</th></tr></thead><tbody><tr><td>FP32</td><td>~128 GB</td></tr><tr><td>FP16/BF16</td><td>~64 GB</td></tr><tr><td>8-bit</td><td>~32 GB</td></tr><tr><td>4-bit</td><td>~16 GB</td></tr></tbody></table></div><p>І тут виникає дуже спокуслива думка:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B Q4 ≈ 16 GB
+
+GPU = 16 GB
+
+→ модель поміститься!</code></pre></div><p>Не поспішайте.</p><hr></section><section class="article-section" aria-labelledby="section-11"><div class="section-heading"><span class="section-index" aria-hidden="true">11</span><h2 id="section-11">11. Ваги — це не все</h2></div><p>Під час inference GPU використовує пам'ять не лише для ваг моделі.</p><p>Спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">VRAM
+│
+├── Model Weights
+│
+├── KV Cache
+│
+├── Runtime Buffers
+│
+├── Temporary Tensors
+│
+└── Additional Overhead</code></pre></div><p>Тому:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model file = 16 GB</code></pre></div><p>не означає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Required VRAM = 16 GB</code></pre></div><p>Потрібен запас.</p><hr></section><section class="article-section" aria-labelledby="section-12"><div class="section-heading"><span class="section-index" aria-hidden="true">12</span><h2 id="section-12">12. Що таке VRAM?</h2></div><p>VRAM — це пам'ять відеокарти.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU
+┌─────────────────────────┐
+│ Compute                 │
+│                         │
+│ VRAM                    │
+│ ┌─────────────────────┐ │
+│ │ Model               │ │
+│ │ KV Cache            │ │
+│ │ Runtime             │ │
+│ └─────────────────────┘ │
+└─────────────────────────┘</code></pre></div><p>Для локальної LLM це одна з найважливіших характеристик GPU.</p><p>Тому карти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">8 GB
+12 GB
+16 GB
+24 GB
+48 GB
+80 GB</code></pre></div><p>відкривають дуже різні можливості.</p><hr></section><section class="article-section" aria-labelledby="section-13"><div class="section-heading"><span class="section-index" aria-hidden="true">13</span><h2 id="section-13">13. VRAM визначає не швидкість, а передусім місткість</h2></div><p>Це принциповий момент.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU A
+24 GB VRAM
+
+GPU B
+24 GB VRAM</code></pre></div><p>На обох може поміститися одна й та сама модель.</p><p>Але це <strong>не означає</strong>, що вони генеруватимуть відповідь з однаковою швидкістю.</p><p>VRAM відповідає насамперед на питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Чи можемо ми розмістити необхідні дані?</strong></div></blockquote><p>А не:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Наскільки швидко GPU їх обробить?</strong></div></blockquote><p>До швидкості ми ще повернемося.</p><hr></section><section class="article-section" aria-labelledby="section-14"><div class="section-heading"><span class="section-index" aria-hidden="true">14</span><h2 id="section-14">14. Що таке KV Cache?</h2></div><p>Під час генерації Transformer не хоче кожного разу повністю перераховувати всю попередню послідовність.</p><p>Для цього використовують:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">KV Cache</code></pre></div><p>де KV — це:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Key
+Value</code></pre></div><p>Дуже спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Prompt
+ │
+ ▼
+Transformer
+ │
+ ├── previous K/V ──► KV Cache
+ │
+ ▼
+Next Token</code></pre></div><p>Потім:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Next Token
+    +
+KV Cache
+    ↓
+Next Token</code></pre></div><p>Це суттєво прискорює autoregressive generation.</p><p>Але KV Cache потрібно десь зберігати.</p><p>І він також займає RAM або VRAM.</p><hr></section><section class="article-section" aria-labelledby="section-15"><div class="section-heading"><span class="section-index" aria-hidden="true">15</span><h2 id="section-15">15. Context впливає на пам'ять</h2></div><p>Уявімо модель:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Context = 128K</code></pre></div><p>Це означає, що вона потенційно може працювати з дуже великою кількістю токенів.</p><p>Але:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">більше tokens
+      ↓
+більший KV Cache
+      ↓
+більше пам'яті</code></pre></div><p>Тому модель може прекрасно працювати з:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Context = 8K</code></pre></div><p>але при:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Context = 128K</code></pre></div><p>раптово перестати поміщатися у VRAM.</p><hr></section><section class="article-section" aria-labelledby="section-16"><div class="section-heading"><span class="section-index" aria-hidden="true">16</span><h2 id="section-16">16. Максимальний Context не потрібно виставляти завжди</h2></div><p>Припустимо, модель підтримує:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">128K</code></pre></div><p>А ваша реальна задача потребує:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">16K</code></pre></div><p>Немає сенсу автоматично резервувати максимум.</p><p>Умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">16K Context
+↓
+менший KV Cache
+
+128K Context
+↓
+значно більший KV Cache</code></pre></div><p>Тому context — це не просто характеристика моделі.</p><p>Це ще й параметр, який впливає на ресурси.</p><hr></section><section class="article-section" aria-labelledby="section-17"><div class="section-heading"><span class="section-index" aria-hidden="true">17</span><h2 id="section-17">17. Груба формула VRAM</h2></div><p>Для початкової оцінки можна мислити так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Required VRAM
+≈
+Model Weights
++
+KV Cache
++
+Runtime Overhead
++
+Safety Margin</code></pre></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Weights       18 GB
+KV Cache       3 GB
+Runtime        1 GB
+Reserve        2 GB
+-------------------
+Total         24 GB</code></pre></div><p>Цифри тут лише приклад.</p><p>Реальні значення залежать від:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">model architecture
+context
+batch size
+KV precision
+runtime
+quantization</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-18"><div class="section-heading"><span class="section-index" aria-hidden="true">18</span><h2 id="section-18">18. А якщо VRAM не вистачає?</h2></div><p>Припустимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model = 28 GB
+
+GPU VRAM = 16 GB</code></pre></div><p>Чи означає це, що модель взагалі не запуститься?</p><p>Не обов'язково.</p><p>Деякі runtime дозволяють використовувати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU
++
+System RAM</code></pre></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">MODEL
+│
+├── 16 GB → VRAM
+│
+└── 12 GB → RAM</code></pre></div><p>Це називають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">CPU offload</code></pre></div><p>або залежно від реалізації — partial GPU offload.</p><hr></section><section class="article-section" aria-labelledby="section-19"><div class="section-heading"><span class="section-index" aria-hidden="true">19</span><h2 id="section-19">19. Модель запустилася ≠ модель працює комфортно</h2></div><p>CPU offload дозволяє запускати більші моделі.</p><p>Але дані доводиться обробляти або переміщувати між:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">CPU
+RAM
+PCIe
+GPU
+VRAM</code></pre></div><p>Умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">RAM
+ │
+ │ PCIe
+ ▼
+VRAM
+ │
+ ▼
+GPU</code></pre></div><p>І це може стати bottleneck.</p><p>Тому дуже важливе правило:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>«Модель запускається» і «моделлю комфортно користуватися» — різні речі.</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-20"><div class="section-heading"><span class="section-index" aria-hidden="true">20</span><h2 id="section-20">20. RAM теж важлива</h2></div><p>Якщо плануємо локальні LLM, не можна дивитися лише на GPU.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU: 24 GB
+RAM: 16 GB</code></pre></div><p>може виявитися незручною конфігурацією для великих моделей та offload.</p><p>Для AI workstation часто зустрічаються:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32 GB RAM
+64 GB RAM
+128 GB RAM</code></pre></div><p>Чим активніше використовується CPU offload і чим більші моделі, тим важливішою стає системна RAM.</p><hr></section><section class="article-section" aria-labelledby="section-21"><div class="section-heading"><span class="section-index" aria-hidden="true">21</span><h2 id="section-21">21. CPU теж нікуди не зникає</h2></div><p>Якщо модель повністю знаходиться у VRAM, основну важку роботу виконує GPU.</p><p>Але CPU все одно може займатися:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">tokenization
+application logic
+RAG
+data preprocessing
+network services
+vector database
+runtime coordination</code></pre></div><p>А якщо використовується CPU inference або offload — його значення різко зростає.</p><p>Наприклад, AI-сервер може одночасно запускати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">LLM
++
+Embedding Model
++
+Reranker
++
+Vector Database
++
+API
++
+Application</code></pre></div><p>Тоді CPU та RAM уже дуже важливі.</p><hr></section><section class="article-section" aria-labelledby="section-22"><div class="section-heading"><span class="section-index" aria-hidden="true">22</span><h2 id="section-22">22. Що таке GGUF?</h2></div><p>При завантаженні локальних моделей часто бачимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">model.gguf</code></pre></div><p>GGUF — популярний формат для локального inference, особливо в екосистемі <code>llama.cpp</code>.</p><p>У ньому можуть міститися:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model Weights
+Metadata
+Tokenizer Information
+Quantization Information</code></pre></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model-32B-Q4_K_M.gguf</code></pre></div><p>тепер можна прочитати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model
+│
+├── 32B       → parameter class
+│
+├── Q4_K_M    → quantization
+│
+└── GGUF      → file format</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-23"><div class="section-heading"><span class="section-index" aria-hidden="true">23</span><h2 id="section-23">23. GPU — це не просто «24 GB»</h2></div><p>Тепер найцікавіше.</p><p>Припустимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU A
+24 GB VRAM
+
+GPU B
+24 GB VRAM</code></pre></div><p>Чи однакові вони для AI?</p><p>Ні.</p><p>Для inference важливі щонайменше:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">VRAM Capacity
+Memory Bandwidth
+Compute Performance
+Supported Numeric Formats
+Matrix / Tensor Acceleration
+Power / Thermal Limits
+Software Support</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-24"><div class="section-heading"><span class="section-index" aria-hidden="true">24</span><h2 id="section-24">24. Memory Bandwidth</h2></div><p>Одна з характеристик, яку часто недооцінюють:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Memory Bandwidth</code></pre></div><p>Вона показує, який обсяг даних GPU може передавати між своєю пам'яттю та обчислювальними блоками за одиницю часу.</p><p>Умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU A
+
+VRAM: 24 GB
+Bandwidth: 500 GB/s</code></pre></div><p>і:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU B
+
+VRAM: 24 GB
+Bandwidth: 1000 GB/s</code></pre></div><p>Обидві карти мають однакову місткість.</p><p>Але друга потенційно може значно швидше читати великі обсяги ваг.</p><hr></section><section class="article-section" aria-labelledby="section-25"><div class="section-heading"><span class="section-index" aria-hidden="true">25</span><h2 id="section-25">25. Чому bandwidth такий важливий для LLM?</h2></div><p>Під час генерації кожного нового токена модель повинна виконати велику кількість операцій із вагами.</p><p>Для багатьох режимів LLM inference швидкість може суттєво залежати від того, наскільки швидко GPU отримує ці дані з VRAM.</p><p>Спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">VRAM
+ │
+ │ weights
+ ▼
+GPU Compute
+ │
+ ▼
+Next Token</code></pre></div><p>Потім:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">VRAM
+ │
+ ▼
+GPU
+ │
+ ▼
+Next Token</code></pre></div><p>І так багато разів.</p><p>Якщо compute може працювати швидше, ніж пам'ять постачає дані:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU waits for memory</code></pre></div><p>отримуємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Memory Bottleneck</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-26"><div class="section-heading"><span class="section-index" aria-hidden="true">26</span><h2 id="section-26">26. Теоретична оцінка через bandwidth</h2></div><p>Припустимо дуже спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model weights = 20 GB
+
+Memory bandwidth = 1000 GB/s</code></pre></div><p>Якби для кожного токена потрібно було один раз прочитати всі 20 GB ваг, теоретична верхня межа була б:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">1000 / 20
+≈
+50 tokens/sec</code></pre></div><p>Це <strong>дуже груба модель</strong>.</p><p>Реальний inference складніший:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">cache
+compute
+kernel efficiency
+quantization
+batching
+architecture
+memory access patterns</code></pre></div><p>Але така оцінка добре пояснює, чому bandwidth настільки важливий.</p><hr></section><section class="article-section" aria-labelledby="section-27"><div class="section-heading"><span class="section-index" aria-hidden="true">27</span><h2 id="section-27">27. CUDA Cores</h2></div><p>На NVIDIA GPU часто дивляться на:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">CUDA Cores</code></pre></div><p>Це універсальні обчислювальні блоки GPU.</p><p>Вони виконують величезну кількість паралельних операцій.</p><p>Але для AI не варто порівнювати карти тільки за:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">кількістю CUDA cores</code></pre></div><p>Різні покоління GPU мають різну архітектуру.</p><p>Тому:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">10000 CUDA cores</code></pre></div><p>на одній архітектурі не обов'язково еквівалентні такій самій кількості на іншій.</p><hr></section><section class="article-section" aria-labelledby="section-28"><div class="section-heading"><span class="section-index" aria-hidden="true">28</span><h2 id="section-28">28. Tensor Cores</h2></div><p>Для AI особливо цікаві:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Tensor Cores</code></pre></div><p>Це спеціалізовані блоки для матричних операцій.</p><p>А нейронні мережі дуже активно використовують саме матричні обчислення.</p><p>Умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Matrix
+   ×
+Matrix
+   ↓
+Tensor Cores
+   ↓
+Result</code></pre></div><p>Tensor Cores оптимізовані для форматів на кшталт:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">FP16
+BF16
+TF32
+FP8
+INT8</code></pre></div><p>залежно від покоління GPU.</p><hr></section><section class="article-section" aria-labelledby="section-29"><div class="section-heading"><span class="section-index" aria-hidden="true">29</span><h2 id="section-29">29. Чому підтримка FP8 може бути важливою?</h2></div><p>Новіші GPU можуть ефективно працювати з меншою precision.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">FP16
+ ↓
+FP8</code></pre></div><p>означає менше даних.</p><p>Потенційно це дає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">менше memory traffic
++
+більшу throughput
++
+менше memory usage</code></pre></div><p>Але лише якщо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU
++
+model
++
+runtime</code></pre></div><p>реально підтримують та ефективно використовують відповідний формат.</p><p>Тому наявність слова <code>FP8</code> у характеристиках GPU сама по собі ще не гарантує прискорення конкретної моделі.</p><hr></section><section class="article-section" aria-labelledby="section-30"><div class="section-heading"><span class="section-index" aria-hidden="true">30</span><h2 id="section-30">30. TFLOPS — теж не вся правда</h2></div><p>У характеристиках GPU можна побачити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TFLOPS</code></pre></div><p>це теоретична кількість операцій з плаваючою комою за секунду.</p><p>Здається:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">більше TFLOPS
+=
+краща GPU для LLM</code></pre></div><p>Але inference може бути:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">compute-bound</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">memory-bound</code></pre></div><p>Якщо ми вперлися в bandwidth:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">ще більше compute</code></pre></div><p>може майже не допомогти.</p><p>Тому GPU потрібно оцінювати комплексно.</p><hr></section><section class="article-section" aria-labelledby="section-31"><div class="section-heading"><span class="section-index" aria-hidden="true">31</span><h2 id="section-31">31. Дві карти з 24 GB можуть бути дуже різними</h2></div><p>Тепер можемо повернутися до нашого прикладу.</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU A
+24 GB
+старіша архітектура
+нижчий bandwidth
+слабші matrix operations</code></pre></div><p>проти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU B
+24 GB
+новіша архітектура
+вищий bandwidth
+швидші Tensor operations
+краща підтримка precision</code></pre></div><p>На обох:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">MODEL FITS</code></pre></div><p>Але:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">tokens/sec</code></pre></div><p>може суттєво відрізнятися.</p><p>Отже:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>VRAM відповідає переважно на питання «чи поміститься?», а архітектура, bandwidth та compute — «як швидко працюватиме?».</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-32"><div class="section-heading"><span class="section-index" aria-hidden="true">32</span><h2 id="section-32">32. Що таке tokens/sec?</h2></div><p>Для локальної LLM часто бачимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">15 tok/s
+30 tok/s
+60 tok/s
+100 tok/s</code></pre></div><p>Це швидкість генерації.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">50 tok/s</code></pre></div><p>означає приблизно 50 токенів відповіді за секунду.</p><p>Але це лише один показник.</p><hr></section><section class="article-section" aria-labelledby="section-33"><div class="section-heading"><span class="section-index" aria-hidden="true">33</span><h2 id="section-33">33. Time To First Token</h2></div><p>Користувачу важливо не лише, наскільки швидко модель пише відповідь.</p><p>Важливо, скільки він чекає <strong>до появи першого токена</strong>.</p><p>Це:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TTFT
+=
+Time To First Token</code></pre></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Prompt
+ │
+ │ 5 seconds
+ ▼
+First Token
+ │
+ │ 60 tok/s
+ ▼
+Response</code></pre></div><p>Модель може мати чудові:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">60 tok/s</code></pre></div><p>але користувач усе одно відчує затримку через довгу початкову обробку prompt.</p><hr></section><section class="article-section" aria-labelledby="section-34"><div class="section-heading"><span class="section-index" aria-hidden="true">34</span><h2 id="section-34">34. Prompt Processing та Generation — різні речі</h2></div><p>Inference умовно можна розділити на:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">PROMPT
+  ↓
+PREFILL
+  ↓
+FIRST TOKEN
+  ↓
+DECODE
+  ↓
+ANSWER</code></pre></div><p><strong>Prefill</strong> — обробка вхідного контексту.</p><p><strong>Decode</strong> — генерація наступних токенів.</p><p>Ці фази мають різний профіль навантаження.</p><p>Тому benchmark:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">tokens/sec</code></pre></div><p>без пояснення, що саме вимірювалося, може вводити в оману.</p><hr></section><section class="article-section" aria-labelledby="section-35"><div class="section-heading"><span class="section-index" aria-hidden="true">35</span><h2 id="section-35">35. Один користувач і 100 користувачів — різні задачі</h2></div><p>Для домашнього AI:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">1 user</code></pre></div><p>важлива швидкість однієї сесії.</p><p>Для корпоративного сервера:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">100 users</code></pre></div><p>важливішим стає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Throughput</code></pre></div><p>тобто скільки роботи система може виконувати одночасно.</p><p>Тут з'являються:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Batching
+Concurrent Requests
+KV Cache Management
+Scheduling</code></pre></div><p>Тому GPU для домашнього AI workstation та GPU для production inference server можуть вибиратися за різними критеріями.</p><hr></section><section class="article-section" aria-labelledby="section-36"><div class="section-heading"><span class="section-index" aria-hidden="true">36</span><h2 id="section-36">36. 8 GB VRAM</h2></div><p>Тепер перейдемо до практики.</p><p>Приблизний клас:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">8 GB VRAM</code></pre></div><p>Добре підходить для знайомства з локальними LLM.</p><p>Реалістично дивитися на:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">3B
+7B
+8B</code></pre></div><p>особливо з:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Q4
+Q5</code></pre></div><p>Можливі задачі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Chat
+Summarization
+Simple Coding
+Classification
+Experiments</code></pre></div><p>Більші моделі також іноді можна запускати через offload, але швидкість може сильно постраждати.</p><hr></section><section class="article-section" aria-labelledby="section-37"><div class="section-heading"><span class="section-index" aria-hidden="true">37</span><h2 id="section-37">37. 12 GB VRAM</h2></div><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">12 GB</code></pre></div><p>вже дає більше свободи.</p><p>Комфортними кандидатами можуть бути:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">7B
+8B</code></pre></div><p>а також частина:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">12B
+14B</code></pre></div><p>при відповідній квантизації та context.</p><p>Для домашнього використання це вже цілком робочий клас.</p><hr></section><section class="article-section" aria-labelledby="section-38"><div class="section-heading"><span class="section-index" aria-hidden="true">38</span><h2 id="section-38">38. 16 GB VRAM</h2></div><p>З:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">16 GB</code></pre></div><p>стають значно цікавішими моделі класу:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">14B</code></pre></div><p>Також можна експериментувати з більшими моделями через:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">сильнішу quantization
++
+CPU offload</code></pre></div><p>Але знову:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">RUNS
+≠
+RUNS FAST</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-39"><div class="section-heading"><span class="section-index" aria-hidden="true">39</span><h2 id="section-39">39. 24 GB VRAM</h2></div><p>24 GB — дуже цікавий клас для локального AI.</p><p>Тут уже можна дивитися на багато моделей класу:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">20B
+24B
+27B
+32B</code></pre></div><p>з відповідною квантизацією.</p><p>Це дозволяє отримати хороший баланс:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model Quality
+      +
+Local Execution
+      +
+Usable Speed
+      +
+Reasonable Hardware</code></pre></div><p>Саме тому карти з 24 GB VRAM часто цікаві для локальних AI workstation.</p><hr></section><section class="article-section" aria-labelledby="section-40"><div class="section-heading"><span class="section-index" aria-hidden="true">40</span><h2 id="section-40">40. 48 GB VRAM</h2></div><p>48 GB — уже серйозний запас.</p><p>Він дозволяє:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">більші моделі
++
+вищу precision
++
+більший context
++
+більший KV Cache
++
+менше CPU offload</code></pre></div><p>Це вже клас, який часто має сенс для професійних workstation та inference-серверів.</p><hr></section><section class="article-section" aria-labelledby="section-41"><div class="section-heading"><span class="section-index" aria-hidden="true">41</span><h2 id="section-41">41. 80 GB VRAM</h2></div><p>З:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">80 GB</code></pre></div><p>стають значно реалістичнішими великі моделі та production workloads.</p><p>Але навіть тут не можна сказати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">80 GB
+=
+будь-яка модель</code></pre></div><p>Великі моделі у FP16/BF16 можуть вимагати значно більше.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">70B × 2 bytes
+≈
+140 GB</code></pre></div><p>тільки для ваг.</p><p>Тому навіть 80 GB може бути недостатньо для великої моделі без quantization або multi-GPU.</p><hr></section><section class="article-section" aria-labelledby="section-42"><div class="section-heading"><span class="section-index" aria-hidden="true">42</span><h2 id="section-42">42. Орієнтовна таблиця</h2></div><p>Для <strong>Q4-класу Dense-моделей</strong> можна використовувати дуже приблизний орієнтир:</p><div class="table-scroll" tabindex="0" role="region" aria-label="Таблиця"><table><thead><tr><th scope="col">VRAM</th><th scope="col">На який клас моделей дивитися</th></tr></thead><tbody><tr><td>6–8 GB</td><td>~3B–7B</td></tr><tr><td>10–12 GB</td><td>~7B–14B</td></tr><tr><td>16 GB</td><td>~14B, більші з компромісами</td></tr><tr><td>24 GB</td><td>~20B–32B</td></tr><tr><td>32 GB</td><td>~30B-клас із більшим запасом</td></tr><tr><td>48 GB</td><td>~32B комфортно, можливі значно більші</td></tr><tr><td>80 GB</td><td>великі моделі стають значно реалістичнішими</td></tr></tbody></table></div><p>Але:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Це не таблиця сумісності.</strong></div></blockquote><p>На результат впливають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">quantization
+architecture
+context
+KV cache
+runtime
+batch size</code></pre></div><p>Для MoE ситуація ще складніша.</p><hr></section><section class="article-section" aria-labelledby="section-43"><div class="section-heading"><span class="section-index" aria-hidden="true">43</span><h2 id="section-43">43. Multi-GPU</h2></div><p>А що якщо взяти дві карти?</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU 1
+24 GB
+
+GPU 2
+24 GB</code></pre></div><p>Чи отримуємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">48 GB VRAM?</code></pre></div><p>Логічно — сумарно так.</p><p>Але фізично:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU 1 VRAM</code></pre></div><p>і:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU 2 VRAM</code></pre></div><p>залишаються окремими областями пам'яті.</p><p>Runtime повинен уміти розподілити модель.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">             MODEL
+               │
+        ┌──────┴──────┐
+        ▼             ▼
+      GPU 1          GPU 2
+      24 GB          24 GB</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-44"><div class="section-heading"><span class="section-index" aria-hidden="true">44</span><h2 id="section-44">44. Чому Multi-GPU не дає автоматично ×2 швидкості?</h2></div><p>Тому що GPU потрібно обмінюватися даними.</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU 1
+ │
+ │ PCIe / Interconnect
+ ▼
+GPU 2</code></pre></div><p>Якщо передача даних стає bottleneck:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU 1 waits
+GPU 2 waits</code></pre></div><p>і масштабування далеко не лінійне.</p><p>Тому:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">2 × GPU</code></pre></div><p>не означає автоматично:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">2 × performance</code></pre></div><p>Головна перевага multi-GPU часто полягає в іншому:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Ми можемо запустити модель, яка не поміщається на одній карті.</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-45"><div class="section-heading"><span class="section-index" aria-hidden="true">45</span><h2 id="section-45">45. MoE і пам'ять</h2></div><p>Згадаємо першу частину.</p><p>Припустимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">MoE Model
+
+Total Parameters = 100B
+Active Parameters = 10B</code></pre></div><p>Може виникнути думка:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Працює лише 10B
+
+→ потрібно пам'яті як для 10B</code></pre></div><p>Не обов'язково.</p><p>Ваги інших experts все одно повинні десь знаходитися.</p><p>Тому для пам'яті дуже важливий:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TOTAL MODEL SIZE</code></pre></div><p>а для кількості обчислень:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">ACTIVE PARAMETERS</code></pre></div><p>Це одна з причин, чому MoE може бути обчислювально ефективною, але все одно вимагати багато пам'яті.</p><hr></section><section class="article-section" aria-labelledby="section-46"><div class="section-heading"><span class="section-index" aria-hidden="true">46</span><h2 id="section-46">46. Реальний приклад вибору</h2></div><p>Припустимо, маємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU: 24 GB VRAM
+RAM: 64 GB</code></pre></div><p>Хочемо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Local Coding Assistant</code></pre></div><p>Починаємо не з питання:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Яка найбільша модель запуститься?</code></pre></div><p>а:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Яка модель дасть достатню якість?</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-47"><div class="section-heading"><span class="section-index" aria-hidden="true">47</span><h2 id="section-47">47. Крок 1 — визначаємо клас моделей</h2></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">14B
+24B
+27B
+32B</code></pre></div><p>Відбираємо моделі, які добре працюють із кодом.</p><hr></section><section class="article-section" aria-labelledby="section-48"><div class="section-heading"><span class="section-index" aria-hidden="true">48</span><h2 id="section-48">48. Крок 2 — визначаємо Context</h2></div><p>Наприклад, для роботи з repository нам потрібно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32K</code></pre></div><p>Тоді не потрібно автоматично виставляти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">128K</code></pre></div><p>лише тому, що модель це підтримує.</p><hr></section><section class="article-section" aria-labelledby="section-49"><div class="section-heading"><span class="section-index" aria-hidden="true">49</span><h2 id="section-49">49. Крок 3 — дивимося Quantization</h2></div><p>Маємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">24 GB VRAM</code></pre></div><p>Можна порівняти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Q8
+Q6
+Q5
+Q4</code></pre></div><p>і знайти компроміс між:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">QUALITY
+    ↕
+MEMORY</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-50"><div class="section-heading"><span class="section-index" aria-hidden="true">50</span><h2 id="section-50">50. Крок 4 — дивимося реальний файл</h2></div><p>Не просто:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B Q4</code></pre></div><p>а:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">model.gguf
+
+File Size:
+18.7 GB</code></pre></div><p>Це вже значно корисніша інформація.</p><hr></section><section class="article-section" aria-labelledby="section-51"><div class="section-heading"><span class="section-index" aria-hidden="true">51</span><h2 id="section-51">51. Крок 5 — залишаємо запас</h2></div><p>Якщо маємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">24 GB VRAM</code></pre></div><p>не потрібно намагатися зайняти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">23.99 GB</code></pre></div><p>тільки вагами.</p><p>Потрібні:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">KV Cache
+Runtime
+Buffers</code></pre></div><p>Тому залишаємо запас.</p><hr></section><section class="article-section" aria-labelledby="section-52"><div class="section-heading"><span class="section-index" aria-hidden="true">52</span><h2 id="section-52">52. Крок 6 — запускаємо</h2></div><p>Після запуску дивимося:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">VRAM usage
+RAM usage
+Prompt Processing
+TTFT
+tokens/sec</code></pre></div><p>Але це все ще не головний тест.</p><hr></section><section class="article-section" aria-labelledby="section-53"><div class="section-heading"><span class="section-index" aria-hidden="true">53</span><h2 id="section-53">53. Крок 7 — перевіряємо якість</h2></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model A
+14B Q8
+
+Model B
+27B Q4
+
+Model C
+32B Q4</code></pre></div><p>І даємо їм однаковий набір реальних задач.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">10 bug fixes
+10 code reviews
+10 SQL tasks
+10 API tasks
+5 architecture tasks</code></pre></div><p>Потім порівнюємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Correctness
+Quality
+Latency
+VRAM
+tokens/sec
+Stability</code></pre></div><p>Може виявитися, що:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">14B</code></pre></div><p>вирішує вашу задачу достатньо добре і працює значно швидше.</p><p>Тоді немає сенсу використовувати 32B лише тому, що вона більша.</p><hr></section><section class="article-section" aria-labelledby="section-54"><div class="section-heading"><span class="section-index" aria-hidden="true">54</span><h2 id="section-54">54. Найбільша модель — не завжди правильна мета</h2></div><p>Це одна з найважливіших думок цієї статті.</p><p>Поганий підхід:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPU
+ ↓
+ЯКА НАЙБІЛЬША МОДЕЛЬ СЮДИ ВЛІЗЕ?</code></pre></div><p>Кращий:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TASK
+ ↓
+QUALITY REQUIREMENT
+ ↓
+SMALLEST SUFFICIENT MODEL
+ ↓
+HARDWARE</code></pre></div><p>Чому?</p><p>Менша модель може дати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">менше VRAM
++
+більше tokens/sec
++
+менший TTFT
++
+більший context reserve
++
+більше concurrent users
++
+менше енергоспоживання</code></pre></div><p>при достатній якості.</p><hr></section><section class="article-section" aria-labelledby="section-55"><div class="section-heading"><span class="section-index" aria-hidden="true">55</span><h2 id="section-55">55. Домашній AI та серверний AI</h2></div><p>Для домашнього використання ми часто оптимізуємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">1 User
++
+Maximum Model Quality
++
+Acceptable Speed</code></pre></div><p>Для production:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">100 Users</code></pre></div><p>може бути важливіше:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Throughput
+Cost per Token
+Latency
+Batching
+Reliability
+Concurrency
+Power</code></pre></div><p>Тому карта, яка чудово підходить для домашнього AI, не обов'язково буде оптимальною для production inference.</p><p>І навпаки.</p><hr></section><section class="article-section" aria-labelledby="section-56"><div class="section-heading"><span class="section-index" aria-hidden="true">56</span><h2 id="section-56">56. Що потрібно дивитися при виборі GPU</h2></div><p>Після всього матеріалу можемо скласти нормальний checklist.</p><p>Не тільки:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">VRAM</code></pre></div><p>а:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">┌─────────────────────────────┐
+│ VRAM Capacity               │
+│                             │
+│ Memory Bandwidth            │
+│                             │
+│ Compute Performance         │
+│                             │
+│ Tensor / Matrix Acceleration│
+│                             │
+│ FP16 / BF16 / FP8 / INT8    │
+│                             │
+│ Software Support            │
+│                             │
+│ Power Consumption           │
+│                             │
+│ Cooling                     │
+│                             │
+│ Multi-GPU Connectivity      │
+└─────────────────────────────┘</code></pre></div><p>Для сервера додаються:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Reliability
+ECC
+Form Factor
+Cooling
+Virtualization
+Support
+Warranty</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-57"><div class="section-heading"><span class="section-index" aria-hidden="true">57</span><h2 id="section-57">57. Як читати характеристики моделі</h2></div><p>Припустимо, бачимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Example-32B-Instruct-Q4_K_M.gguf</code></pre></div><p>Тепер можемо розібрати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Example
+│
+└── model family
+
+32B
+│
+└── ~32 billion parameters
+
+Instruct
+│
+└── instruction-tuned
+
+Q4_K_M
+│
+└── quantization
+
+GGUF
+│
+└── local model format</code></pre></div><p>Далі дивимося:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">File Size
+Context
+Architecture
+Dense / MoE</code></pre></div><p>І тільки після цього — на своє обладнання.</p><hr></section><section class="article-section" aria-labelledby="section-58"><div class="section-heading"><span class="section-index" aria-hidden="true">58</span><h2 id="section-58">58. Повний алгоритм</h2></div><p>У результаті вибір локальної LLM виглядає приблизно так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">                TASK
+                  │
+                  ▼
+            MODEL FAMILY
+                  │
+                  ▼
+          PARAMETER COUNT
+                  │
+                  ▼
+           DENSE / MoE
+                  │
+                  ▼
+           QUANTIZATION
+                  │
+                  ▼
+            MODEL SIZE
+                  │
+                  ▼
+                VRAM
+                  │
+                  ▼
+               CONTEXT
+                  │
+                  ▼
+              KV CACHE
+                  │
+                  ▼
+            GPU BANDWIDTH
+                  │
+                  ▼
+              COMPUTE
+                  │
+                  ▼
+             TOKENS/SEC
+                  │
+                  ▼
+                TTFT
+                  │
+                  ▼
+            REAL QUALITY</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-59"><div class="section-heading"><span class="section-index" aria-hidden="true">59</span><h2 id="section-59">59. Шпаргалка</h2></div><p>Якщо потрібно запам'ятати матеріал максимально коротко:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">PARAMETERS
+→ наскільки велика модель
+
+PRECISION
+→ скільки пам'яті займає параметр
+
+QUANTIZATION
+→ як зменшити модель
+
+VRAM
+→ чи поміститься вона на GPU
+
+KV CACHE
+→ додаткова пам'ять для контексту
+
+CONTEXT
+→ скільки інформації модель може обробляти
+
+MEMORY BANDWIDTH
+→ наскільки швидко GPU отримує дані
+
+COMPUTE
+→ наскільки швидко GPU може рахувати
+
+TOKENS/SEC
+→ швидкість генерації
+
+TTFT
+→ як довго чекаємо початку відповіді
+
+RAM
+→ запас для CPU/offload та інших компонентів
+
+MULTI-GPU
+→ можливість розмістити більшу модель</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-60"><div class="section-heading"><span class="section-index" aria-hidden="true">60</span><h2 id="section-60">Висновок</h2></div><p>Для локального AI недостатньо знати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">У мене GPU на 24 GB.</code></pre></div><p>24 GB відповідають лише на частину питання.</p><p>Потрібно враховувати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model Size
+Quantization
+Context
+KV Cache
+Memory Bandwidth
+Compute
+RAM
+CPU
+Runtime</code></pre></div><p>І навіть після цього головним тестом залишається реальна задача.</p><p>Тому правильний процес виглядає не так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Купуємо найбільший GPU
+        ↓
+Запускаємо найбільшу модель</code></pre></div><p>а:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TASK
+ ↓
+MODEL
+ ↓
+QUALITY
+ ↓
+MEMORY REQUIREMENTS
+ ↓
+PERFORMANCE REQUIREMENTS
+ ↓
+HARDWARE
+ ↓
+TEST</code></pre></div><p>І головне правило локального AI:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Шукайте не найбільшу модель, яку можете запустити, а найменшу модель, яка достатньо добре вирішує вашу задачу.</strong></div></blockquote><p>Це дасть:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">менше VRAM
++
+більшу швидкість
++
+більший context reserve
++
+більшу кількість одночасних запитів
++
+менше енергоспоживання
++
+нижчу вартість</code></pre></div><p>А коли наступного разу побачите:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B
+Q4_K_M
+GGUF
+24 GB VRAM
+128K Context
+1000 GB/s</code></pre></div><p>це вже буде не набір випадкових цифр.</p><p>Ви зможете приблизно зрозуміти:</p><p><strong>що це за модель, скільки пам'яті вона потребує, чи поміститься вона на вашому GPU і від чого залежатиме швидкість її роботи.</strong></p></section></article><div class="joker-signature" aria-label="Автор матеріалу Joker"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"><div class="joker-signature-copy"><span class="joker-signature-label">Автор матеріалу · <strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span><span class="joker-signature-note">IT / ПРАКТИКА · Технічні нотатки</span></div></div><footer class="end-note"><span>IT / ПРАКТИКА · 024</span><a href="#top">До початку ↑</a></footer></div></div></main><div class="status" role="status" aria-live="polite"></div></div><script src="assets/js/a2d9670c171975b9f70c.js"></script><script src="assets/js/a39bc17204fe1b6a9715.js"></script><!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"4548d06d74724c949f10a8a96bb207e1"}'></script><!-- End Cloudflare Web Analytics --></body></html>

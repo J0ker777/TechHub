@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI-моделі без магії: які вони бувають і як зрозуміти їх характеристики · IT / Практика</title><link rel="stylesheet" href="assets/css/203500caefe7e9acaff9.css"><link rel="stylesheet" href="assets/css/48521fa8a1a6390a5b3b.css"><link rel="icon" type="image/png" href="assets/images/joker-cube-logo-v1.png"><link rel="canonical" href="https://j0ker777.github.io/TechHub/023-ai-modeli-bez-mahiyi-yaki-vony-buvayut-i-yak-zrozumity-yikh-kharakterystyky.html"><meta name="description" content="GPT, Claude, Gemini, Qwen, Llama, Mistral, DeepSeek... 7B, 14B, 32B, 70B, 128K context, Instruct, Reasoning, Vision, MoE... Якщо вперше відкрити каталог AI-моделей, може здатися, що перед нами набір незрозумілих назв і цифр. А далі…"><meta property="og:title" content="AI-моделі без магії: які вони бувають і як зрозуміти їх характеристики"><meta property="og:description" content="GPT, Claude, Gemini, Qwen, Llama, Mistral, DeepSeek... 7B, 14B, 32B, 70B, 128K context, Instruct, Reasoning, Vision, MoE... Якщо вперше відкрити каталог AI-моделей, може здатися, що перед нами набір незрозумілих назв і цифр. А далі…"><meta property="og:type" content="article"><meta property="og:url" content="https://j0ker777.github.io/TechHub/023-ai-modeli-bez-mahiyi-yaki-vony-buvayut-i-yak-zrozumity-yikh-kharakterystyky.html"><meta property="og:image" content="https://j0ker777.github.io/TechHub/assets/previews/023-ai-modeli-bez-mahiyi-yaki-vony-buvayut-i-yak-zrozumity-yikh-kharakterystyky-og-v2.jpg"><meta property="og:image:secure_url" content="https://j0ker777.github.io/TechHub/assets/previews/023-ai-modeli-bez-mahiyi-yaki-vony-buvayut-i-yak-zrozumity-yikh-kharakterystyky-og-v2.jpg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="675"><meta property="og:image:alt" content="Обкладинка: AI-моделі без магії: які вони бувають і як зрозуміти їх характеристики"><meta property="og:site_name" content="TechHub · Joker"><meta property="og:locale" content="uk_UA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AI-моделі без магії: які вони бувають і як зрозуміти їх характеристики"><meta name="twitter:description" content="GPT, Claude, Gemini, Qwen, Llama, Mistral, DeepSeek... 7B, 14B, 32B, 70B, 128K context, Instruct, Reasoning, Vision, MoE... Якщо вперше відкрити каталог AI-моделей, може здатися, що перед нами набір незрозумілих назв і цифр. А далі…"><meta name="twitter:image" content="https://j0ker777.github.io/TechHub/assets/previews/023-ai-modeli-bez-mahiyi-yaki-vony-buvayut-i-yak-zrozumity-yikh-kharakterystyky-og-v2.jpg"></head><body id="top"><input class="theme-input" id="theme-toggle" type="checkbox" aria-label="Світла тема"><div class="site"><div class="reading-progress" aria-hidden="true"></div><header><div class="topbar"><div class="masthead"><a class="joker-home-link" href="index.html" aria-label="На головну сторінку TechHub"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"></a><div class="joker-brand-copy"><div><a class="brand" href="#top">IT <b>/</b> ПРАКТИКА</a><span class="edition-note">ТЕХНІЧНІ НОТАТКИ</span></div><span class="joker-byline">Автор матеріалу ·&nbsp;<strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span></div></div><div class="actions"><div class="auth-profile" data-auth-profile hidden><span class="auth-profile-picture"><span class="auth-profile-fallback" data-auth-fallback aria-hidden="true"></span><img class="auth-profile-avatar" data-auth-avatar alt="" width="34" height="34" referrerpolicy="no-referrer" hidden></span><span class="auth-profile-name" data-auth-name></span><button class="auth-profile-logout" data-auth-logout type="button">Вийти</button></div><label class="theme" for="theme-toggle"><span class="theme-dark-label">Світла тема</span><span class="theme-light-label">Темна тема</span></label></div></div></header><main><div class="hero"><div class="eyebrow">Архітектура / IT-практика</div><div class="hero-intro"><h1><span class="headline-topic">AI-моделі без магії:</span> <span class="headline-text">які вони бувають і як зрозуміти їх характеристики</span></h1><div class="issue-number" aria-hidden="true"><b>023</b><span>ВИПУСК / 023</span></div></div><div class="meta"><span class="pill">IT / ПРАКТИКА</span><span>№ 023</span><span>~ 17–19 хв читання</span></div><figure class="cover"><img src="assets/images/023-ai-modeli-bez-mahiyi-yaki-vony-buvayut-i-yak-zrozumity-yikh-kharakterystyky.png" width="1672" height="941" alt="Обкладинка: AI-моделі без магії: які вони бувають і як зрозуміти їх характеристики"></figure></div><div class="layout"><aside class="sidebar" aria-label="Зміст статті"><details open><summary>У ЦІЙ СТАТТІ</summary><nav><a href="#section-1">1. ChatGPT — це не AI-модель</a>
+<a href="#section-2">2. Не кожна AI-модель — це LLM</a>
+<a href="#section-3">3. Що таке LLM</a>
+<a href="#section-4">4. Що таке token</a>
+<a href="#section-5">5. General-purpose моделі</a>
+<a href="#section-6">6. Coding models</a>
+<a href="#section-7">7. Reasoning models</a>
+<a href="#section-8">8. Vision та Multimodal</a>
+<a href="#section-9">9. Що означає 7B, 14B, 32B, 70B</a>
+<a href="#section-10">10. Що таке параметри</a>
+<a href="#section-11">11. Більше параметрів = краща модель?</a>
+<a href="#section-12">12. Dense models</a>
+<a href="#section-13">13. MoE — Mixture of Experts</a>
+<a href="#section-14">14. Навіщо потрібен MoE</a>
+<a href="#section-15">15. Base та Instruct</a>
+<a href="#section-16">16. Context Window</a>
+<a href="#section-17">17. Context — це не довгострокова пам'ять</a>
+<a href="#section-18">18. Чи означає більший context кращу модель?</a>
+<a href="#section-19">19. Temperature</a>
+<a href="#section-20">20. Top-P</a>
+<a href="#section-21">21. Fine-tuning</a>
+<a href="#section-22">22. Fine-tuning ≠ RAG</a>
+<a href="#section-23">23. Embedding Models</a>
+<a href="#section-24">24. Speech models</a>
+<a href="#section-25">25. Tool Calling</a>
+<a href="#section-26">26. LLM та AI Agent — не одне й те саме</a>
+<a href="#section-27">27. Structured Output</a>
+<a href="#section-28">28. Open-weight моделі</a>
+<a href="#section-29">29. Cloud та Local — це вже спосіб використання</a>
+<a href="#section-30">30. Benchmark</a>
+<a href="#section-31">31. Чому benchmark недостатньо</a>
+<a href="#section-32">32. Тестувати потрібно на своїх задачах</a>
+<a href="#section-33">33. Як вибирати AI-модель</a>
+<a href="#section-34">34. Приклад №1 — звичайний корпоративний AI-чат</a>
+<a href="#section-35">35. Приклад №2 — AI для програмування</a>
+<a href="#section-36">36. Приклад №3 — корпоративний AI-агент</a>
+<a href="#section-37">37. Приклад №4 — голосовий AI</a>
+<a href="#section-38">38. Що потрібно запам'ятати</a>
+<a href="#section-39">Висновок</a></nav></details></aside><div class="article-column"><article class="article" aria-label="AI-моделі без магії: які вони бувають і як зрозуміти їх характеристики"><section class="opening" aria-label="Вступ"><div class="eyebrow" aria-hidden="true">Вступ</div><p>GPT, Claude, Gemini, Qwen, Llama, Mistral, DeepSeek...</p><p>7B, 14B, 32B, 70B, 128K context, Instruct, Reasoning, Vision, MoE...</p><p>Якщо вперше відкрити каталог AI-моделей, може здатися, що перед нами набір незрозумілих назв і цифр.</p><p>А далі виникає логічне питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Яку модель вибрати?</strong></div></blockquote><p>Найбільшу?</p><p>Найновішу?</p><p>Ту, у якої більше параметрів?</p><p>Ту, яка займає перше місце в benchmark?</p><p>Насправді універсальної «найкращої AI-моделі» не існує.</p><p>Модель потрібно вибирати <strong>під конкретну задачу</strong>.</p><p>Щоб це робити, спочатку потрібно розібратися, які моделі взагалі існують і що означають їх характеристики.</p><hr></section><section class="article-section" aria-labelledby="section-1"><div class="section-heading"><span class="section-index" aria-hidden="true">01</span><h2 id="section-1">1. ChatGPT — це не AI-модель</h2></div><p>Почнемо з поширеної плутанини.</p><p>ChatGPT — це продукт.</p><p>Усередині такого продукту можуть бути:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">┌────────────────────────────┐
+│          ChatGPT           │
+│                            │
+│  Chat                      │
+│  Files                     │
+│  Search                    │
+│  Memory                    │
+│  Tools                     │
+│  Agents                    │
+│                            │
+│            ↓               │
+│        AI MODEL            │
+└────────────────────────────┘</code></pre></div><p>AI-модель — лише одна частина системи.</p><p>Спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">MODEL
+  ↓
+API / Runtime
+  ↓
+Application
+  ↓
+Tools / RAG / Agents
+  ↓
+User</code></pre></div><p>Одна й та сама модель потенційно може використовуватися:</p><ul><li>у чаті;</li><li>через API;</li><li>у корпоративній системі;</li><li>у IDE;</li><li>локально на комп'ютері;</li><li>в AI-агенті;</li><li>у системі аналізу документів.</li></ul><p>Тому порівнювати, наприклад, <strong>ChatGPT</strong> і <strong>Llama</strong> без уточнення контексту не зовсім коректно: в одному випадку ми говоримо про готовий продукт, в іншому — про сімейство моделей.</p><hr></section><section class="article-section" aria-labelledby="section-2"><div class="section-heading"><span class="section-index" aria-hidden="true">02</span><h2 id="section-2">2. Не кожна AI-модель — це LLM</h2></div><p>Сьогодні терміни AI та LLM часто використовують майже як синоніми.</p><p>Але LLM — лише один із класів AI-моделей.</p><p>Спрощено екосистему можна представити так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">AI MODELS
+│
+├── Language Models
+│
+├── Reasoning Models
+│
+├── Coding Models
+│
+├── Vision / Multimodal Models
+│
+├── Embedding Models
+│
+├── Speech-to-Text
+│
+├── Text-to-Speech
+│
+└── Image / Video Generation</code></pre></div><p>Кожен тип вирішує свою задачу.</p><hr></section><section class="article-section" aria-labelledby="section-3"><div class="section-heading"><span class="section-index" aria-hidden="true">03</span><h2 id="section-3">3. Що таке LLM</h2></div><p>LLM означає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Large Language Model</code></pre></div><p>або:</p><p><strong>велика мовна модель.</strong></p><p>Основна задача такої моделі — працювати з послідовністю токенів і прогнозувати їх продовження.</p><p>Дуже спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Вхідний текст
+      ↓
+Tokenizer
+      ↓
+Tokens
+      ↓
+LLM
+      ↓
+Наступний token
+      ↓
+Наступний token
+      ↓
+...
+      ↓
+Відповідь</code></pre></div><p>Саме на цьому механізмі базується величезна кількість можливостей:</p><ul><li>відповіді на питання;</li><li>генерація тексту;</li><li>переклад;</li><li>написання коду;</li><li>аналіз документів;</li><li>узагальнення;</li><li>класифікація;</li><li>робота з інструкціями.</li></ul><p>Тобто модель не дістає готову відповідь із величезної бази відповідей.</p><p>Вона <strong>генерує послідовність токенів</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-4"><div class="section-heading"><span class="section-index" aria-hidden="true">04</span><h2 id="section-4">4. Що таке token</h2></div><p>LLM не бачить текст так, як його бачить людина.</p><p>Перед передачею в модель текст проходить через tokenizer.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">&quot;Створи REST API для користувачів&quot;</code></pre></div><p>перетворюється на послідовність токенів:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">[token]
+[token]
+[token]
+[token]
+...</code></pre></div><p>Токен не обов'язково дорівнює одному слову.</p><p>Це може бути:</p><ul><li>слово;</li><li>частина слова;</li><li>символ;</li><li>послідовність символів.</li></ul><p>Спрощена схема:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TEXT
+ ↓
+TOKENIZER
+ ↓
+TOKENS
+ ↓
+MODEL
+ ↓
+TOKENS
+ ↓
+TEXT</code></pre></div><p>Саме тому в AI API часто зустрічаємо поняття:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">input tokens
+output tokens</code></pre></div><p>Токени використовуються для визначення розміру контексту, обмеження відповіді та часто — для розрахунку вартості API.</p><hr></section><section class="article-section" aria-labelledby="section-5"><div class="section-heading"><span class="section-index" aria-hidden="true">05</span><h2 id="section-5">5. General-purpose моделі</h2></div><p>Це універсальні моделі.</p><p>Вони можуть виконувати широкий спектр задач:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">текст
+код
+аналіз
+переклад
+пояснення
+структурування
+робота з документами</code></pre></div><p>До відомих сімейств належать, наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GPT
+Claude
+Gemini
+Qwen
+Llama
+Mistral
+DeepSeek
+Gemma</code></pre></div><p>Але навіть усередині одного сімейства можуть бути різні моделі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">велика
+мала
+швидка
+reasoning
+coding
+vision</code></pre></div><p>Тому назва сімейства ще не говорить, яка конкретно модель краще підходить під задачу.</p><hr></section><section class="article-section" aria-labelledby="section-6"><div class="section-heading"><span class="section-index" aria-hidden="true">06</span><h2 id="section-6">6. Coding models</h2></div><p>Окремий важливий напрям — моделі, оптимізовані для програмування.</p><p>Типові задачі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Code Generation
+Code Completion
+Bug Fixing
+Code Review
+Refactoring
+Test Generation
+Repository Analysis</code></pre></div><p>Наприклад, ми можемо дати моделі:</p><div class="code-block"><div class="code-toolbar"><span>JAVASCRIPT</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-javascript">function getUser(id) {
+    ...
+}</code></pre></div><p>і попросити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Знайди потенційні проблеми безпеки.</code></pre></div><p>Або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Реалізуй цей endpoint.</code></pre></div><p>Але сьогодні межа між coding і general-purpose моделями стає все менш чіткою.</p><p>Сильна універсальна модель також може дуже добре працювати з кодом.</p><p>Тому напис <code>Coder</code> у назві — корисна характеристика спеціалізації, але не гарантія того, що ця модель автоматично буде кращою за всі універсальні моделі.</p><hr></section><section class="article-section" aria-labelledby="section-7"><div class="section-heading"><span class="section-index" aria-hidden="true">07</span><h2 id="section-7">7. Reasoning models</h2></div><p>Для частини задач просто швидко продовжити текст недостатньо.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">складна математика
+архітектура системи
+debugging
+планування
+аналіз великої кількості умов
+складні логічні задачі</code></pre></div><p>Для цього використовуються reasoning-моделі або reasoning-режими.</p><p>Умовно звичайну генерацію можна представити так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Prompt
+  ↓
+Model
+  ↓
+Answer</code></pre></div><p>А reasoning-підхід:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Prompt
+  ↓
+Model
+  ↓
+Additional reasoning / compute
+  ↓
+Answer</code></pre></div><p>Ключова ідея:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Модель може витратити більше обчислень на задачу перед формуванням фінальної відповіді.</strong></div></blockquote><p>Це називають, зокрема:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">inference-time compute</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">test-time compute</code></pre></div><p>Більше обчислень може допомогти на складних задачах, але зазвичай означає більшу затримку та/або вартість.</p><p>І важливий нюанс: внутрішній процес міркування моделі не обов'язково показується користувачу.</p><hr></section><section class="article-section" aria-labelledby="section-8"><div class="section-heading"><span class="section-index" aria-hidden="true">08</span><h2 id="section-8">8. Vision та Multimodal</h2></div><p>Раніше мовні моделі переважно працювали з текстом.</p><p>Сучасні моделі можуть працювати з кількома типами інформації.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TEXT
+IMAGE
+AUDIO
+VIDEO
+DOCUMENT</code></pre></div><p>Такі моделі називають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Multimodal</code></pre></div><p>або можна зустріти позначення:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Vision
+VL
+Vision-Language</code></pre></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Фото інтерфейсу
+       ↓
+Vision Model
+       ↓
+&quot;На формі відсутня кнопка...&quot;</code></pre></div><p>Або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Architecture Diagram
+        ↓
+Multimodal Model
+        ↓
+Architecture Analysis</code></pre></div><p>Це особливо корисно для:</p><ul><li>аналізу скриншотів;</li><li>документів;</li><li>схем;</li><li>фотографій;</li><li>UI;</li><li>графіків.</li></ul><hr></section><section class="article-section" aria-labelledby="section-9"><div class="section-heading"><span class="section-index" aria-hidden="true">09</span><h2 id="section-9">9. Що означає 7B, 14B, 32B, 70B</h2></div><p>Тепер переходимо до однієї з найпомітніших характеристик.</p><p>Біля назв моделей часто можна побачити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">7B
+14B
+32B
+70B</code></pre></div><p><code>B</code> означає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Billion</code></pre></div><p>тобто <strong>мільярд</strong>.</p><p>Отже:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">7B  ≈ 7 мільярдів параметрів
+14B ≈ 14 мільярдів параметрів
+32B ≈ 32 мільярди параметрів
+70B ≈ 70 мільярдів параметрів</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-10"><div class="section-heading"><span class="section-index" aria-hidden="true">10</span><h2 id="section-10">10. Що таке параметри</h2></div><p>Модель можна дуже спрощено представити як величезну математичну функцію.</p><p>Усередині неї знаходиться величезна кількість числових коефіцієнтів:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">0.1827
+-0.7421
+1.3928
+0.0041
+...</code></pre></div><p>Це і є параметри моделі.</p><p>Під час навчання:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Training Data
+      ↓
+Training
+      ↓
+Parameters change
+      ↓
+Trained Model</code></pre></div><p>Модель поступово змінює ці значення.</p><p>У результаті мільярди параметрів кодують закономірності, які модель навчилася використовувати.</p><hr></section><section class="article-section" aria-labelledby="section-11"><div class="section-heading"><span class="section-index" aria-hidden="true">11</span><h2 id="section-11">11. Більше параметрів = краща модель?</h2></div><p>Одна з головних помилок:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">70B &gt; 32B &gt; 14B &gt; 7B</code></pre></div><p>і звідси висновок:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">70B завжди краща.</code></pre></div><p>Це неправильно.</p><p>На якість моделі впливають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Architecture
++
+Training Data
++
+Data Quality
++
+Training Process
++
+Post-training
++
+Fine-tuning
++
+Reasoning techniques
++
+Context handling
++
+Tool use</code></pre></div><p>Тому сучасна добре навчена модель меншого розміру може перевершувати значно більшу старішу модель в конкретних задачах.</p><p>Кількість параметрів потрібно сприймати як <strong>технічну характеристику</strong>, а не як показник IQ.</p><hr></section><section class="article-section" aria-labelledby="section-12"><div class="section-heading"><span class="section-index" aria-hidden="true">12</span><h2 id="section-12">12. Dense models</h2></div><p>Тут з'являється ще один важливий нюанс.</p><p>Моделі можуть мати різну архітектуру.</p><p>Один із варіантів:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Dense</code></pre></div><p>Дуже спрощено, у Dense-моделі для обробки кожного токена задіюється вся мережа.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B Dense
+
+Token
+  │
+  ▼
+┌───────────────────┐
+│███████████████████│
+│        32B        │
+└───────────────────┘</code></pre></div><p>Тому якщо бачимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B Dense</code></pre></div><p>можна приблизно говорити про модель із 32 млрд параметрів, що беруть участь в обчисленні.</p><hr></section><section class="article-section" aria-labelledby="section-13"><div class="section-heading"><span class="section-index" aria-hidden="true">13</span><h2 id="section-13">13. MoE — Mixture of Experts</h2></div><p>Інший підхід:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">MoE</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Mixture of Experts</code></pre></div><p>Тут модель складається з набору умовних «експертів».</p><p>Спеціальний механізм — router — визначає, які експерти потрібно використати для конкретного токена.</p><p>Спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">                   ┌─ Expert 1
+                   │
+                   ├─ Expert 2 ← active
+                   │
+Token → Router ────┼─ Expert 3
+                   │
+                   ├─ Expert 4
+                   │
+                   ├─ Expert 5 ← active
+                   │
+                   └─ Expert 6</code></pre></div><p>Тобто не всі параметри моделі обов'язково активуються одночасно.</p><p>Саме тому біля MoE можна побачити щось на кшталт:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Total Parameters: 100B
+Active Parameters: 10B</code></pre></div><p>Це означає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">100B</code></pre></div><p>параметрів є в моделі загалом,</p><p>але приблизно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">10B</code></pre></div><p>використовуються для конкретного проходу відповідно до архітектури моделі.</p><hr></section><section class="article-section" aria-labelledby="section-14"><div class="section-heading"><span class="section-index" aria-hidden="true">14</span><h2 id="section-14">14. Навіщо потрібен MoE</h2></div><p>Ідея MoE полягає в тому, щоб отримати переваги дуже великої моделі, не використовуючи всі її параметри для кожного токена.</p><p>Умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Dense:
+
+Token
+ ↓
+████████████████
+all network</code></pre></div><p>MoE:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Token
+ ↓
+Router
+ ↓
+██   ██
+selected experts</code></pre></div><p>Це може суттєво зменшити обчислення порівняно з Dense-моделлю такого самого загального розміру.</p><p>Але є важливий нюанс.</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Active parameters і розмір моделі в пам'яті — не одне й те саме.</strong></div></blockquote><p>Навіть якщо модель має відносно мало active parameters, ваги інших експертів усе одно потрібно десь зберігати.</p><p>Це стане особливо важливим, коли в другій статті говоритимемо про VRAM.</p><hr></section><section class="article-section" aria-labelledby="section-15"><div class="section-heading"><span class="section-index" aria-hidden="true">15</span><h2 id="section-15">15. Base та Instruct</h2></div><p>У назвах open-weight моделей можна побачити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model-Base</code></pre></div><p>та:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model-Instruct</code></pre></div><p>Різниця принципова.</p><h3>Base</h3><p>Base-модель пройшла основне навчання.</p><p>Її базова задача — добре прогнозувати продовження послідовності.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Київ — столиця...</code></pre></div><p>модель прогнозує:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">України</code></pre></div><p>Але Base-модель не обов'язково добре поводитиметься як чат-асистент.</p><hr><h3>Instruct</h3><p>Instruct-модель додатково налаштована виконувати інструкції.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Поясни OAuth 2.0.
+
+Знайди помилку в коді.
+
+Напиши SQL-запит.
+
+Поверни результат у JSON.</code></pre></div><p>Тому для:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">chat
+assistant
+coding assistant
+agent</code></pre></div><p>часто потрібна саме <strong>Instruct/Chat-модель</strong>.</p><hr></section><section class="article-section" aria-labelledby="section-16"><div class="section-heading"><span class="section-index" aria-hidden="true">16</span><h2 id="section-16">16. Context Window</h2></div><p>Ще одна характеристика:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">8K
+32K
+128K
+256K
+1M</code></pre></div><p>Це розмір <strong>контекстного вікна</strong>.</p><p>Контекст — інформація, доступна моделі під час поточного inference.</p><p>Спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">┌──────────────────────────────────┐
+│ SYSTEM PROMPT                    │
+│                                  │
+│ CHAT HISTORY                     │
+│                                  │
+│ DOCUMENTS                        │
+│                                  │
+│ CODE                             │
+│                                  │
+│ RAG RESULTS                      │
+│                                  │
+│ USER QUESTION                    │
+│                                  │
+│ GENERATED RESPONSE               │
+└──────────────────────────────────┘
+
+             CONTEXT</code></pre></div><p>Усе це займає токени.</p><hr></section><section class="article-section" aria-labelledby="section-17"><div class="section-heading"><span class="section-index" aria-hidden="true">17</span><h2 id="section-17">17. Context — це не довгострокова пам'ять</h2></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Context = 128K</code></pre></div><p>не означає:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>AI назавжди пам'ятає 128 000 токенів нашого спілкування.</div></blockquote><p>Це означає, що модель може обробити певний обсяг інформації в рамках конкретного контексту.</p><p>Довгострокова пам'ять у готовому AI-продукті може бути реалізована зовсім іншими механізмами.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Database
+Vector Search
+User Profile
+Conversation Summary
+RAG</code></pre></div><p>А потрібна інформація вже потім додається в контекст моделі.</p><hr></section><section class="article-section" aria-labelledby="section-18"><div class="section-heading"><span class="section-index" aria-hidden="true">18</span><h2 id="section-18">18. Чи означає більший context кращу модель?</h2></div><p>Також ні.</p><p>Припустимо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model A → 32K
+Model B → 256K</code></pre></div><p>З цього не можна зробити висновок:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model B &gt; Model A</code></pre></div><p>Великий контекст корисний для:</p><ul><li>великих документів;</li><li>codebase;</li><li>логів;</li><li>довгих чатів;</li><li>RAG;</li><li>контрактів;</li><li>великих звітів.</li></ul><p>Але важливе інше питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Наскільки добре модель знаходить і використовує потрібну інформацію всередині цього контексту?</strong></div></blockquote><p>Максимальний context window та якість long-context reasoning — різні характеристики.</p><hr></section><section class="article-section" aria-labelledby="section-19"><div class="section-heading"><span class="section-index" aria-hidden="true">19</span><h2 id="section-19">19. Temperature</h2></div><p>При генерації відповіді модель оцінює ймовірності наступних токенів.</p><p>Умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">&quot;Столиця Франції —&quot;
+
+Paris      96%
+London      1%
+Berlin    0.5%
+Rome      0.2%
+...</code></pre></div><p>Параметр:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">temperature</code></pre></div><p>впливає на розподіл і вибір наступних токенів.</p><p>Дуже спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">низька temperature
+        ↓
+більш передбачувана генерація
+
+вища temperature
+        ↓
+більше варіативності</code></pre></div><p>Для задач на кшталт:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">JSON
+classification
+data extraction</code></pre></div><p>часто потрібна стабільніша поведінка.</p><p>Для:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">brainstorming
+creative writing
+ideas</code></pre></div><p>може бути корисна більша варіативність.</p><p>Конкретні рекомендовані значення залежать від моделі та API.</p><hr></section><section class="article-section" aria-labelledby="section-20"><div class="section-heading"><span class="section-index" aria-hidden="true">20</span><h2 id="section-20">20. Top-P</h2></div><p>Інший параметр генерації:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">top_p</code></pre></div><p>Спрощено уявімо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Token A    50%
+Token B    25%
+Token C    10%
+Token D     5%
+Token E     3%
+...</code></pre></div><p>Top-P дозволяє обмежити набір кандидатів найбільш імовірними токенами до певної сумарної ймовірності.</p><p>Для базового розуміння достатньо запам'ятати:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>Temperature і Top-P не додають моделі нових знань. Вони впливають на те, як модель вибирає наступні токени.</strong></div></blockquote><hr></section><section class="article-section" aria-labelledby="section-21"><div class="section-heading"><span class="section-index" aria-hidden="true">21</span><h2 id="section-21">21. Fine-tuning</h2></div><p>Уявімо, що є універсальна модель:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GENERAL MODEL</code></pre></div><p>Ми хочемо спеціалізувати її.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">General Model
+      ↓
+Special Dataset
+      ↓
+Fine-tuning
+      ↓
+Specialized Model</code></pre></div><p>Fine-tuning змінює параметри моделі.</p><p>Його можна використовувати, наприклад, для:</p><ul><li>спеціального стилю відповідей;</li><li>певного формату;</li><li>доменної поведінки;</li><li>спеціалізованих задач.</li></ul><p>Але тут виникає дуже важлива плутанина.</p><hr></section><section class="article-section" aria-labelledby="section-22"><div class="section-heading"><span class="section-index" aria-hidden="true">22</span><h2 id="section-22">22. Fine-tuning ≠ RAG</h2></div><p>Припустимо, компанія має:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">10 000 внутрішніх документів</code></pre></div><p>і хоче, щоб AI відповідав на питання за ними.</p><p>Перша думка:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>Давайте навчимо модель на наших документах.</div></blockquote><p>Але часто це не найкращий шлях.</p><h3>Fine-tuning</h3><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">DATA
+ ↓
+TRAINING
+ ↓
+MODEL WEIGHTS CHANGE</code></pre></div><h3>RAG</h3><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">User Question
+      ↓
+Search
+      ↓
+Knowledge Base
+      ↓
+Relevant Information
+      ↓
+LLM Context
+      ↓
+Answer</code></pre></div><p>При RAG ваги LLM не потрібно змінювати.</p><p>Ми знаходимо потрібну інформацію та передаємо її моделі в контекст.</p><p>Це особливо важливо для інформації, яка:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">часто змінюється
+має права доступу
+повинна мати джерело
+міститься в документах</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-23"><div class="section-heading"><span class="section-index" aria-hidden="true">23</span><h2 id="section-23">23. Embedding Models</h2></div><p>Але як знайти потрібний документ за змістом?</p><p>Тут з'являється ще один клас моделей:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Embedding Model</code></pre></div><p>Її задача — не генерувати текст.</p><p>Вона перетворює інформацію на числовий вектор.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">&quot;RabbitMQ cluster&quot;
+
+        ↓
+
+Embedding Model
+
+        ↓
+
+[0.17, -0.42, 0.81, 0.13, ...]</code></pre></div><p>Інший текст:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">&quot;налаштування кластера RabbitMQ&quot;</code></pre></div><p>отримає інший вектор, але він може бути математично близьким до першого.</p><p>Це дозволяє виконувати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Semantic Search
+Similarity Search
+RAG
+Recommendations</code></pre></div><p>Тому AI-система може використовувати одразу кілька моделей:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Embedding Model
+       +
+Reranker
+       +
+LLM</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-24"><div class="section-heading"><span class="section-index" aria-hidden="true">24</span><h2 id="section-24">24. Speech models</h2></div><p>Ще один окремий клас — моделі для роботи з голосом.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Speech-to-Text</code></pre></div><p>перетворює:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">AUDIO
+ ↓
+TEXT</code></pre></div><p>Відомий приклад такого підходу — Whisper.</p><p>А Text-to-Speech робить зворотне:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TEXT
+ ↓
+AUDIO</code></pre></div><p>Тому голосовий AI-асистент може складатися з кількох компонентів:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">CALL
+ ↓
+Speech-to-Text
+ ↓
+TEXT
+ ↓
+LLM
+ ↓
+TEXT
+ ↓
+Text-to-Speech
+ ↓
+VOICE</code></pre></div><p>Отже, «голосовий AI» — це не обов'язково одна модель.</p><p>Це може бути цілий pipeline.</p><hr></section><section class="article-section" aria-labelledby="section-25"><div class="section-heading"><span class="section-index" aria-hidden="true">25</span><h2 id="section-25">25. Tool Calling</h2></div><p>LLM має фундаментальне обмеження.</p><p>Вона не знає актуальний стан ваших систем, якщо ці дані їй не передати.</p><p>Наприклад, користувач питає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Який статус замовлення 12345?</code></pre></div><p>Модель не повинна вигадувати відповідь.</p><p>Замість цього вона може викликати інструмент:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">get_order_status(
+    order_id = 12345
+)</code></pre></div><p>Схема:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">User
+ ↓
+LLM
+ ↓
+Tool Call
+ ↓
+API
+ ↓
+Business System
+ ↓
+Result
+ ↓
+LLM
+ ↓
+Answer</code></pre></div><p>Це називають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Tool Calling</code></pre></div><p>або залежно від платформи:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Function Calling</code></pre></div><p>Це одна з основ сучасних AI-агентів.</p><hr></section><section class="article-section" aria-labelledby="section-26"><div class="section-heading"><span class="section-index" aria-hidden="true">26</span><h2 id="section-26">26. LLM та AI Agent — не одне й те саме</h2></div><p>Звичайна LLM:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Prompt
+ ↓
+Model
+ ↓
+Answer</code></pre></div><p>AI Agent може виглядати приблизно так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">             ┌── Search
+             │
+             ├── Database
+User → LLM ──┼── API
+             │
+             ├── Files
+             │
+             └── Other Tools
+                   │
+                   ▼
+                 Result
+                   │
+                   ▼
+                  LLM
+                   │
+                   ▼
+                 Answer</code></pre></div><p>Тобто:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>LLM — це модель. Agent — система, яка використовує модель для прийняття рішень і роботи з інструментами.</strong></div></blockquote><p>Тому якість AI-агента залежить не тільки від самої LLM.</p><hr></section><section class="article-section" aria-labelledby="section-27"><div class="section-heading"><span class="section-index" aria-hidden="true">27</span><h2 id="section-27">27. Structured Output</h2></div><p>Для інтеграцій дуже важливо, щоб модель могла повертати не просто текст:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Користувача знайдено. Його ID — 123.</code></pre></div><p>а структурований результат:</p><div class="code-block"><div class="code-toolbar"><span>JSON</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-json">{
+  <span class="str">&quot;userId&quot;</span>: <span class="num">123</span>,
+  <span class="str">&quot;status&quot;</span>: <span class="str">&quot;active&quot;</span>
+}</code></pre></div><p>Тому при виборі моделі для корпоративної системи можуть бути важливими:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Instruction Following
+Structured Output
+JSON
+Tool Calling
+Function Calling</code></pre></div><p>Модель може чудово писати статті, але погано виконувати строгий формат.</p><p>Для AI-агента це може бути критично.</p><hr></section><section class="article-section" aria-labelledby="section-28"><div class="section-heading"><span class="section-index" aria-hidden="true">28</span><h2 id="section-28">28. Open-weight моделі</h2></div><p>Частину моделей можна завантажити та запускати на власній інфраструктурі.</p><p>Їх часто називають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">open-source models</code></pre></div><p>але точніше в багатьох випадках говорити:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">open-weight</code></pre></div><p>Тобто доступні ваги моделі.</p><p>Це не обов'язково означає, що відкриті:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">training dataset
+training code
+training process
+license without restrictions</code></pre></div><p>Тому для корпоративного використання потрібно перевіряти ліцензію конкретної моделі.</p><hr></section><section class="article-section" aria-labelledby="section-29"><div class="section-heading"><span class="section-index" aria-hidden="true">29</span><h2 id="section-29">29. Cloud та Local — це вже спосіб використання</h2></div><p>Одну модель можна отримувати як сервіс:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     ↓
+Internet
+     ↓
+AI Provider
+     ↓
+Model</code></pre></div><p>або запускати на власній інфраструктурі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     ↓
+Local AI Server
+     ↓
+GPU
+     ↓
+Model</code></pre></div><p>Cloud дає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">простий старт
+масштабування
+доступ до великих моделей
+відсутність власного GPU</code></pre></div><p>Local дає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">контроль
+offline
+privacy
+контроль інфраструктури</code></pre></div><p>Але Local додає нові питання:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Який GPU?
+
+Скільки VRAM?
+
+Що таке Q4?
+
+Що таке GGUF?
+
+Чому 32B модель не влазить у відеокарту?
+
+Чому вона запустилася, але працює повільно?</code></pre></div><p>Це вже тема наступної статті.</p><hr></section><section class="article-section" aria-labelledby="section-30"><div class="section-heading"><span class="section-index" aria-hidden="true">30</span><h2 id="section-30">30. Benchmark</h2></div><p>Як зрозуміти, наскільки модель хороша?</p><p>Для цього існують benchmark — стандартизовані набори тестів.</p><p>Вони можуть перевіряти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Coding
+Math
+Reasoning
+Knowledge
+Long Context
+Tool Use
+Agentic Tasks</code></pre></div><p>У результаті отримуємо умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Model A → 78
+Model B → 81
+Model C → 74</code></pre></div><p>Здається, все просто:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">81 &gt; 78 &gt; 74</code></pre></div><p>Отже, беремо Model B?</p><p>Не обов'язково.</p><hr></section><section class="article-section" aria-labelledby="section-31"><div class="section-heading"><span class="section-index" aria-hidden="true">31</span><h2 id="section-31">31. Чому benchmark недостатньо</h2></div><p>Припустимо, benchmark перевіряє складні математичні задачі.</p><p>А ваша задача:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">аналізувати API logs</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">генерувати SQL</code></pre></div><p>або:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">працювати з корпоративними документами українською мовою</code></pre></div><p>Результат математичного benchmark може мати обмежену практичну цінність.</p><p>Тому benchmark краще використовувати для:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">100 моделей
+      ↓
+benchmark
+      ↓
+5 кандидатів
+      ↓
+власні тести
+      ↓
+1–2 моделі</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-32"><div class="section-heading"><span class="section-index" aria-hidden="true">32</span><h2 id="section-32">32. Тестувати потрібно на своїх задачах</h2></div><p>Припустимо, потрібен coding assistant.</p><p>Можна створити набір:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">20 bug fixing tasks
+
+20 code generation tasks
+
+10 refactoring tasks
+
+10 architecture questions
+
+10 repository navigation tasks</code></pre></div><p>І перевіряти:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Correctness
+Instruction Following
+Tool Calling
+Context Handling
+Latency
+Stability</code></pre></div><p>Тільки після цього можна робити висновок, наскільки модель підходить саме вам.</p><hr></section><section class="article-section" aria-labelledby="section-33"><div class="section-heading"><span class="section-index" aria-hidden="true">33</span><h2 id="section-33">33. Як вибирати AI-модель</h2></div><p>Тепер можна скласти нормальний алгоритм.</p><p>Не починаємо з:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Яка модель зараз найкраща?</code></pre></div><p>Починаємо з:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">ЩО Я ХОЧУ ЗРОБИТИ?</code></pre></div><p>Далі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">                    TASK
+                      │
+                      ▼
+               TYPE OF MODEL
+                      │
+                      ▼
+                 QUALITY
+                      │
+                      ▼
+                  CONTEXT
+                      │
+                      ▼
+               TOOL CALLING?
+                      │
+                      ▼
+               MULTIMODAL?
+                      │
+                      ▼
+                 PRIVACY
+                      │
+                      ▼
+              LOCAL / CLOUD
+                      │
+                      ▼
+                   COST
+                      │
+                      ▼
+                  MODELS
+                      │
+                      ▼
+              YOUR EVALUATION</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-34"><div class="section-heading"><span class="section-index" aria-hidden="true">34</span><h2 id="section-34">34. Приклад №1 — звичайний корпоративний AI-чат</h2></div><p>Потрібно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">відповідати на питання
+аналізувати документи
+створювати тексти</code></pre></div><p>Тоді дивимося на:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">General-purpose
++
+Instruct
++
+достатній Context
++
+якість роботи з потрібними мовами</code></pre></div><p>Якщо потрібна корпоративна база знань:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">+
+RAG</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-35"><div class="section-heading"><span class="section-index" aria-hidden="true">35</span><h2 id="section-35">35. Приклад №2 — AI для програмування</h2></div><p>Потрібно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">генерувати код
+аналізувати repository
+виправляти bugs
+запускати tools</code></pre></div><p>Тоді особливо важливі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Coding Quality
+Context
+Tool Calling
+Instruction Following
+Agentic Capabilities</code></pre></div><p>І зовсім не обов'язково модель із найбільшою кількістю параметрів буде найкращим варіантом.</p><hr></section><section class="article-section" aria-labelledby="section-36"><div class="section-heading"><span class="section-index" aria-hidden="true">36</span><h2 id="section-36">36. Приклад №3 — корпоративний AI-агент</h2></div><p>Потрібно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">отримати заявку
+      ↓
+знайти користувача
+      ↓
+перевірити систему
+      ↓
+викликати API
+      ↓
+проаналізувати результат
+      ↓
+дати відповідь</code></pre></div><p>Тут критично важливі:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Tool Calling
+Structured Output
+Instruction Following
+Reasoning
+Reliability</code></pre></div><p>А сама LLM стає лише одним компонентом більшої системи.</p><hr></section><section class="article-section" aria-labelledby="section-37"><div class="section-heading"><span class="section-index" aria-hidden="true">37</span><h2 id="section-37">37. Приклад №4 — голосовий AI</h2></div><p>Потрібно обробляти телефонний дзвінок.</p><p>Тоді система може виглядати так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">CALL
+ │
+ ▼
+Speech-to-Text
+ │
+ ▼
+LLM
+ │
+ ├── API
+ ├── CRM
+ └── Knowledge Base
+ │
+ ▼
+Text-to-Speech
+ │
+ ▼
+CALLER</code></pre></div><p>Тут питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«Яку LLM вибрати?»</div></blockquote><p>— лише частина архітектурної задачі.</p><p>Не менш важливими стають:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">STT latency
+LLM latency
+TTS latency
+tool latency
+quality
+concurrency</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-38"><div class="section-heading"><span class="section-index" aria-hidden="true">38</span><h2 id="section-38">38. Що потрібно запам'ятати</h2></div><p>Коли ви бачите назву нової моделі, не потрібно одразу дивитися, чи більше в неї параметрів, ніж у конкурентів.</p><p>Краще пройтися по питаннях:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Який це тип моделі?
+        ↓
+General / Coding / Reasoning / Vision?
+
+Скільки параметрів?
+        ↓
+7B / 14B / 32B / 70B?
+
+Яка архітектура?
+        ↓
+Dense / MoE?
+
+Якщо MoE:
+        ↓
+Total / Active parameters?
+
+Base чи Instruct?
+        ↓
+
+Який Context?
+        ↓
+
+Чи є Vision?
+        ↓
+
+Чи підтримує Tool Calling?
+        ↓
+
+Чи підтримує Structured Output?
+        ↓
+
+Cloud чи можна запускати Local?
+        ↓
+
+Яка ліцензія?
+        ↓
+
+І головне:
+
+ЧИ ВИРІШУЄ ВОНА МОЮ ЗАДАЧУ?</code></pre></div><hr></section><section class="article-section" aria-labelledby="section-39"><div class="section-heading"><span class="section-index" aria-hidden="true">39</span><h2 id="section-39">Висновок</h2></div><p>Універсальної «найкращої AI-моделі» не існує.</p><p>Модель для coding assistant і модель для голосового оператора можуть мати зовсім різні вимоги.</p><p>Модель для корпоративного RAG і модель для генерації зображень взагалі вирішують різні задачі.</p><p>А число:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">70B</code></pre></div><p>саме по собі ще дуже мало говорить про реальну користь моделі.</p><p>Правильний підхід виглядає так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">TASK
+ ↓
+REQUIREMENTS
+ ↓
+MODEL TYPE
+ ↓
+MODEL CANDIDATES
+ ↓
+BENCHMARKS
+ ↓
+YOUR TESTS
+ ↓
+MODEL</code></pre></div><p>Тому замість питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>«Яка AI-модель найкраща?»</strong></div></blockquote><p>краще поставити:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>«Яка AI-модель найкраще підходить для цієї конкретної задачі?»</strong></div></blockquote><p>Але після вибору моделі виникає наступне питання.</p><p>Припустимо, ми знайшли:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">32B Instruct
+128K Context</code></pre></div><p>і хочемо запустити її локально.</p><p>Чи вистачить відеокарти на 16 GB?</p><p>А на 24 GB?</p><p>Чому модель на 32 мільярди параметрів може займати 64 GB, а після квантизації — значно менше?</p><p>Що таке:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">FP16
+BF16
+FP8
+Q8
+Q5
+Q4
+GGUF
+VRAM
+KV Cache
+Memory Bandwidth
+Tensor Cores</code></pre></div><p>І чому дві відеокарти з однаковими <strong>24 GB VRAM</strong> можуть запускати ту саму модель із зовсім різною швидкістю?</p><p><strong>Про це — у другій частині: «Локальний AI без магії: GPU, VRAM, квантизація і як зрозуміти, яку модель потягне ваш комп'ютер».</strong></p></section></article><div class="joker-signature" aria-label="Автор матеріалу Joker"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"><div class="joker-signature-copy"><span class="joker-signature-label">Автор матеріалу · <strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span><span class="joker-signature-note">IT / ПРАКТИКА · Технічні нотатки</span></div></div><footer class="end-note"><span>IT / ПРАКТИКА · 023</span><a href="#top">До початку ↑</a></footer></div></div></main><div class="status" role="status" aria-live="polite"></div></div><script src="assets/js/a2d9670c171975b9f70c.js"></script><script src="assets/js/a39bc17204fe1b6a9715.js"></script><!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"4548d06d74724c949f10a8a96bb207e1"}'></script><!-- End Cloudflare Web Analytics --></body></html>
