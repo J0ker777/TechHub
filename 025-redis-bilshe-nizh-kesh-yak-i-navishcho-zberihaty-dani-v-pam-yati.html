@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Redis: більше ніж кеш — як і навіщо зберігати дані в памʼяті · IT / Практика</title><link rel="stylesheet" href="assets/css/203500caefe7e9acaff9.css"><link rel="stylesheet" href="assets/css/48521fa8a1a6390a5b3b.css"><link rel="icon" type="image/png" href="assets/images/joker-cube-logo-v1.png"><link rel="canonical" href="https://j0ker777.github.io/TechHub/025-redis-bilshe-nizh-kesh-yak-i-navishcho-zberihaty-dani-v-pam-yati.html"><meta name="description" content="Коли в архітектурі системи зʼявляється Redis, пояснення часто звучить приблизно так: Це правда, але лише частина картини. Redis може кешувати результати запитів до бази даних, зберігати сесії користувачів, лічильники, тимчасові токени,…"><meta property="og:title" content="Redis: більше ніж кеш — як і навіщо зберігати дані в памʼяті"><meta property="og:description" content="Коли в архітектурі системи зʼявляється Redis, пояснення часто звучить приблизно так: Це правда, але лише частина картини. Redis може кешувати результати запитів до бази даних, зберігати сесії користувачів, лічильники, тимчасові токени,…"><meta property="og:type" content="article"><meta property="og:url" content="https://j0ker777.github.io/TechHub/025-redis-bilshe-nizh-kesh-yak-i-navishcho-zberihaty-dani-v-pam-yati.html"><meta property="og:image" content="https://j0ker777.github.io/TechHub/assets/previews/025-redis-bilshe-nizh-kesh-yak-i-navishcho-zberihaty-dani-v-pam-yati-og-v2.jpg"><meta property="og:image:secure_url" content="https://j0ker777.github.io/TechHub/assets/previews/025-redis-bilshe-nizh-kesh-yak-i-navishcho-zberihaty-dani-v-pam-yati-og-v2.jpg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="675"><meta property="og:image:alt" content="Обкладинка: Redis: більше ніж кеш — як і навіщо зберігати дані в памʼяті"><meta property="og:site_name" content="TechHub · Joker"><meta property="og:locale" content="uk_UA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Redis: більше ніж кеш — як і навіщо зберігати дані в памʼяті"><meta name="twitter:description" content="Коли в архітектурі системи зʼявляється Redis, пояснення часто звучить приблизно так: Це правда, але лише частина картини. Redis може кешувати результати запитів до бази даних, зберігати сесії користувачів, лічильники, тимчасові токени,…"><meta name="twitter:image" content="https://j0ker777.github.io/TechHub/assets/previews/025-redis-bilshe-nizh-kesh-yak-i-navishcho-zberihaty-dani-v-pam-yati-og-v2.jpg"></head><body id="top"><input class="theme-input" id="theme-toggle" type="checkbox" aria-label="Світла тема"><div class="site"><div class="reading-progress" aria-hidden="true"></div><header><div class="topbar"><div class="masthead"><a class="joker-home-link" href="index.html" aria-label="На головну сторінку TechHub"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"></a><div class="joker-brand-copy"><div><a class="brand" href="#top">IT <b>/</b> ПРАКТИКА</a><span class="edition-note">ТЕХНІЧНІ НОТАТКИ</span></div><span class="joker-byline">Автор матеріалу ·&nbsp;<strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span></div></div><div class="actions"><div class="auth-profile" data-auth-profile hidden><span class="auth-profile-picture"><span class="auth-profile-fallback" data-auth-fallback aria-hidden="true"></span><img class="auth-profile-avatar" data-auth-avatar alt="" width="34" height="34" referrerpolicy="no-referrer" hidden></span><span class="auth-profile-name" data-auth-name></span><button class="auth-profile-logout" data-auth-logout type="button">Вийти</button></div><label class="theme" for="theme-toggle"><span class="theme-dark-label">Світла тема</span><span class="theme-light-label">Темна тема</span></label></div></div></header><main><div class="hero"><div class="eyebrow">Архітектура / IT-практика</div><div class="hero-intro"><h1><span class="headline-topic">Redis:</span> <span class="headline-text">більше ніж кеш — як і навіщо зберігати дані в памʼяті</span></h1><div class="issue-number" aria-hidden="true"><b>025</b><span>ВИПУСК / 025</span></div></div><div class="meta"><span class="pill">IT / ПРАКТИКА</span><span>№ 025</span><span>~ 12–14 хв читання</span></div><figure class="cover"><img src="assets/images/025-redis-bilshe-nizh-kesh-yak-i-navishcho-zberihaty-dani-v-pam-yati.png" width="1600" height="900" alt="Обкладинка: Redis: більше ніж кеш — як і навіщо зберігати дані в памʼяті"></figure></div><div class="layout"><aside class="sidebar" aria-label="Зміст статті"><details open><summary>У ЦІЙ СТАТТІ</summary><nav><a href="#section-1">1. Що таке Redis</a>
+<a href="#section-2">2. Навіщо Redis, якщо вже є база даних?</a>
+<a href="#section-3">3. TTL: дані, які живуть певний час</a>
+<a href="#section-4">4. Redis — це не тільки кеш</a>
+<a href="#section-5">5. Лічильники</a>
+<a href="#section-6">6. Rate Limiting</a>
+<a href="#section-7">7. Тимчасові токени та OTP</a>
+<a href="#section-8">8. Distributed Lock</a>
+<a href="#section-9">9. Найскладніше питання кешу</a>
+<a href="#section-10">10. Cache-Aside</a>
+<a href="#section-11">11. Cache Stampede</a>
+<a href="#section-12">12. Pub/Sub</a>
+<a href="#section-13">13. А як щодо Redis Streams?</a>
+<a href="#section-14">14. Redis vs Database vs RabbitMQ</a>
+<a href="#section-15">15. Що станеться, якщо Redis впаде?</a>
+<a href="#section-16">16. А Redis взагалі зберігає дані на диск?</a>
+<a href="#section-17">17. А якщо сам Redis один?</a>
+<a href="#section-18">18. Типова помилка: кешувати все</a>
+<a href="#section-19">19. Redis додає швидкість, але й додає складність</a>
+<a href="#section-20">20. Що потрібно запамʼятати</a></nav></details></aside><div class="article-column"><article class="article" aria-label="Redis: більше ніж кеш — як і навіщо зберігати дані в памʼяті"><section class="opening" aria-label="Вступ"><div class="eyebrow" aria-hidden="true">Вступ</div><p>Коли в архітектурі системи зʼявляється Redis, пояснення часто звучить приблизно так:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«Це кеш. Він дуже швидкий».</div></blockquote><p>Це правда, але лише частина картини.</p><p>Redis може кешувати результати запитів до бази даних, зберігати сесії користувачів, лічильники, тимчасові токени, використовуватися для rate limiting, координації декількох екземплярів сервісу, Pub/Sub та інших задач.</p><p>Але головна особливість Redis одночасно є його перевагою і причиною багатьох архітектурних помилок:</p><p><strong>Redis дуже швидкий, тому його легко почати використовувати там, де він насправді не потрібен.</strong></p><p>Розберемося, що це за технологія, навіщо вона потрібна і що необхідно враховувати перед появою Redis у системі.</p><hr></section><section class="article-section" aria-labelledby="section-1"><div class="section-heading"><span class="section-index" aria-hidden="true">01</span><h2 id="section-1">1. Що таке Redis</h2></div><p>Redis — це високопродуктивне сховище даних, яке переважно працює з даними в оперативній памʼяті.</p><p>У традиційній базі даних основне довготривале сховище — диск:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     │
+     ▼
+ Database
+     │
+     ▼
+    Disk</code></pre></div><p>Redis побудований навколо іншої ідеї:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     │
+     ▼
+   Redis
+     │
+     ▼
+    RAM</code></pre></div><p>Оперативна памʼять значно швидша за постійне дискове сховище. Саме тому Redis здатний дуже швидко виконувати величезну кількість операцій.</p><p>Але називати Redis просто «базою даних у RAM» теж не зовсім правильно.</p><p>Він підтримує різні структури даних:</p><ul><li>Strings;</li><li>Hashes;</li><li>Lists;</li><li>Sets;</li><li>Sorted Sets;</li><li>Streams та інші.</li></ul><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">user:123:name = &quot;Anna&quot;</code></pre></div><p>або умовно:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">user:123 = {
+    name: &quot;Anna&quot;,
+    role: &quot;manager&quot;,
+    department: &quot;sales&quot;
+}</code></pre></div><p>Ключі зазвичай мають зрозумілу структуру:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">user:123
+session:a8f71c
+product:458
+otp:user:123
+rate-limit:192.168.1.20</code></pre></div><p>Це дозволяє швидко знаходити потрібні дані без складних SQL-запитів.</p><hr></section><section class="article-section" aria-labelledby="section-2"><div class="section-heading"><span class="section-index" aria-hidden="true">02</span><h2 id="section-2">2. Навіщо Redis, якщо вже є база даних?</h2></div><p>Уявімо звичайний API:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Client
+   │
+   ▼
+Backend
+   │
+   ▼
+Database</code></pre></div><p>Клієнт викликає:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http"><span class="kw">GET</span> /api/products/<span class="num">123</span></code></pre></div><p>Backend виконує SQL:</p><div class="code-block"><div class="code-toolbar"><span>SQL</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-sql"><span class="kw">SELECT</span> *
+<span class="kw">FROM</span> products
+<span class="kw">WHERE</span> id = <span class="num">123</span>;</code></pre></div><p>Якщо цей товар переглянуть 100 000 разів, база може виконати дуже схожий запит 100 000 разів.</p><p>При цьому товар, можливо, змінюється лише раз на день.</p><p>Тут зʼявляється Redis.</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Client
+   │
+   ▼
+Backend
+   │
+   ▼
+Redis
+   │
+   ├── HIT ─────► response
+   │
+   └── MISS
+         │
+         ▼
+      Database</code></pre></div><p>Backend спочатку перевіряє Redis:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">GET product:123</code></pre></div><p>Якщо значення є — отримуємо його з памʼяті.</p><p>Якщо немає — читаємо дані з БД і записуємо їх у Redis:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">SET product:123 ...</code></pre></div><p>Наступні запити вже можуть не звертатися до бази.</p><p>Важлива думка:</p><p><strong>Redis не робить повільний SQL швидшим. Redis дозволяє не виконувати цей SQL кожного разу.</strong></p><hr></section><section class="article-section" aria-labelledby="section-3"><div class="section-heading"><span class="section-index" aria-hidden="true">03</span><h2 id="section-3">3. TTL: дані, які живуть певний час</h2></div><p>Одна з найкорисніших можливостей Redis — TTL (<strong>Time To Live</strong>).</p><p>Можна сказати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">зберігати цей ключ 300 секунд</code></pre></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">product:123
+TTL = 300 seconds</code></pre></div><p>Через пʼять хвилин Redis автоматично видалить ключ.</p><p>Це дуже зручно для тимчасових даних.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">OTP code          → 2 хвилини
+Password reset    → 15 хвилин
+Cache             → 5 хвилин
+Session           → 30 хвилин
+Rate limit        → 1 хвилина</code></pre></div><p>Не потрібно створювати окремий процес, який постійно шукає прострочені записи та видаляє їх.</p><hr></section><section class="article-section" aria-labelledby="section-4"><div class="section-heading"><span class="section-index" aria-hidden="true">04</span><h2 id="section-4">4. Redis — це не тільки кеш</h2></div><p>Кешування — найвідоміший сценарій використання Redis, але далеко не єдиний.</p><h3>Сесії користувачів</h3><p>Уявімо декілька екземплярів backend:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">             Load Balancer
+            /      |      \
+           ▼       ▼       ▼
+        Backend  Backend  Backend
+           │       │       │
+           └───────┼───────┘
+                   ▼
+                 Redis</code></pre></div><p>Користувач може потрапити на будь-який екземпляр backend.</p><p>Тому зберігати сесію лише в памʼяті конкретного сервера незручно.</p><p>Redis може виступати централізованим сховищем сесій:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">session:f72ab91</code></pre></div><p>Будь-який backend може отримати потрібні дані.</p><hr></section><section class="article-section" aria-labelledby="section-5"><div class="section-heading"><span class="section-index" aria-hidden="true">05</span><h2 id="section-5">5. Лічильники</h2></div><p>Redis дуже добре підходить для операцій типу:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">+1</code></pre></div><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">views:article:123 = 1567</code></pre></div><p>При кожному перегляді:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">INCR views:article:123</code></pre></div><p>Redis виконує таку операцію атомарно.</p><p>Це корисно для:</p><ul><li>кількості переглядів;</li><li>статистики;</li><li>спроб авторизації;</li><li>кількості запитів;</li><li>різноманітних технічних метрик.</li></ul><hr></section><section class="article-section" aria-labelledby="section-6"><div class="section-heading"><span class="section-index" aria-hidden="true">06</span><h2 id="section-6">6. Rate Limiting</h2></div><p>Припустимо, API дозволяє:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">100 requests / minute</code></pre></div><p>Для кожного користувача або IP можна створити ключ:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">rate-limit:user:123</code></pre></div><p>При кожному запиті збільшуємо значення:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">1
+2
+3
+...
+99
+100
+101</code></pre></div><p>І встановлюємо TTL:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">60 seconds</code></pre></div><p>Якщо значення перевищило 100:</p><div class="code-block"><div class="code-toolbar"><span>HTTP</span><button type="button" class="copy" aria-label="Копіювати код">Копіювати</button></div><pre tabindex="0"><code class="language-http">HTTP <span class="num">429</span> Too Many Requests</code></pre></div><p>Через хвилину ключ автоматично зникає.</p><p>Це один із класичних сценаріїв використання Redis.</p><hr></section><section class="article-section" aria-labelledby="section-7"><div class="section-heading"><span class="section-index" aria-hidden="true">07</span><h2 id="section-7">7. Тимчасові токени та OTP</h2></div><p>Redis зручний для даних, які за своєю природою повинні швидко зникнути.</p><p>Наприклад, користувачу надсилається OTP:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">482193</code></pre></div><p>У Redis:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">otp:user:123 = 482193
+
+TTL = 120 seconds</code></pre></div><p>Через дві хвилини код автоматично перестає існувати.</p><p>Але важливо памʼятати: Redis не скасовує вимоги безпеки. Секретні значення не варто бездумно зберігати у відкритому вигляді лише тому, що вони мають короткий TTL.</p><hr></section><section class="article-section" aria-labelledby="section-8"><div class="section-heading"><span class="section-index" aria-hidden="true">08</span><h2 id="section-8">8. Distributed Lock</h2></div><p>Тепер цікавіший сценарій.</p><p>У нас працюють три екземпляри одного сервісу:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Service A
+Service B
+Service C</code></pre></div><p>Два з них майже одночасно отримали команду виконати одну операцію.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Generate monthly report</code></pre></div><p>Можемо отримати:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Service A ──► Generate report
+
+Service B ──► Generate report</code></pre></div><p>Операція виконалася двічі.</p><p>Для координації можна використовувати distributed lock:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Service A ──► Redis
+
+SET lock:report ...</code></pre></div><p>Після цього:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Service A
+     │
+     ▼
+ acquire lock
+     │
+     ▼
+ execute operation
+     │
+     ▼
+ release lock</code></pre></div><p>А Service B бачить:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">LOCK EXISTS</code></pre></div><p>і не запускає ту саму операцію.</p><p>Але тут є важливий нюанс.</p><p><strong>Distributed lock — значно складніша задача, ніж просто створити ключ у Redis.</strong></p><p>Потрібно враховувати:</p><ul><li>TTL блокування;</li><li>що станеться при падінні сервісу;</li><li>хто є власником lock;</li><li>як безпечно його звільнити;</li><li>що буде, якщо операція працює довше за TTL.</li></ul><p>Тому сам факт наявності Redis ще не означає, що distributed locking реалізований правильно.</p><hr></section><section class="article-section" aria-labelledby="section-9"><div class="section-heading"><span class="section-index" aria-hidden="true">09</span><h2 id="section-9">9. Найскладніше питання кешу</h2></div><p>Припустимо, у Redis знаходиться:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">product:123
+price = 100</code></pre></div><p>А в базі даних ціну змінили:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">price = 120</code></pre></div><p>Тепер маємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Database
+price = 120
+
+Redis
+price = 100</code></pre></div><p>Що поверне API?</p><p>Якщо використовується кеш — потенційно <strong>100</strong>.</p><p>Це називається <strong>stale data</strong> — застарілі дані.</p><p>І саме тут починається одна з найскладніших задач кешування:</p><p><strong>cache invalidation.</strong></p><p>Як система повинна зрозуміти, що кеш більше не актуальний?</p><hr></section><section class="article-section" aria-labelledby="section-10"><div class="section-heading"><span class="section-index" aria-hidden="true">10</span><h2 id="section-10">10. Cache-Aside</h2></div><p>Один із найпоширеніших підходів виглядає так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">1. Перевірити Redis
+2. Якщо HIT → повернути результат
+3. Якщо MISS → прочитати DB
+4. Записати результат у Redis
+5. Повернути результат</code></pre></div><p>Умовний псевдокод:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">data = redis.get(key)
+
+if data exists:
+    return data
+
+data = database.get(id)
+
+redis.set(key, data, TTL)
+
+return data</code></pre></div><p>Це називають <strong>Cache-Aside Pattern</strong>.</p><p>Він простий і дуже поширений.</p><p>Але при зміні даних потрібно визначити стратегію.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">UPDATE database
+DELETE cache</code></pre></div><p>Наступний запит отримає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Cache MISS</code></pre></div><p>прочитає актуальне значення з БД і знову заповнить кеш.</p><hr></section><section class="article-section" aria-labelledby="section-11"><div class="section-heading"><span class="section-index" aria-hidden="true">11</span><h2 id="section-11">11. Cache Stampede</h2></div><p>Уявімо популярний ключ:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">catalog:popular</code></pre></div><p>Його одночасно використовують тисячі користувачів.</p><p>TTL закінчується.</p><p>Ключ зникає.</p><p>І майже одночасно приходять:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Request 1 ──► MISS
+Request 2 ──► MISS
+Request 3 ──► MISS
+Request 4 ──► MISS
+...
+Request 5000 ──► MISS</code></pre></div><p>Усі вони можуть піти в базу даних.</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">            Redis
+             MISS
+               │
+      ┌────────┼────────┐
+      ▼        ▼        ▼
+   Request  Request  Request
+      │        │        │
+      └────────┼────────┘
+               ▼
+            Database</code></pre></div><p>І кеш, який мав захищати БД від навантаження, раптом сам створює величезний сплеск навантаження.</p><p>Це називають <strong>Cache Stampede</strong>.</p><p>Для боротьби з цим застосовують різні підходи:</p><ul><li>distributed locking;</li><li>різний або випадковий TTL;</li><li>background refresh;</li><li>stale-while-revalidate;</li><li>попереднє прогрівання кешу.</li></ul><hr></section><section class="article-section" aria-labelledby="section-12"><div class="section-heading"><span class="section-index" aria-hidden="true">12</span><h2 id="section-12">12. Pub/Sub</h2></div><p>Redis також має механізм Publish/Subscribe.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Service A
+    │
+    ▼
+PUBLISH user.updated
+    │
+    ▼
+Redis
+   / \
+  ▼   ▼
+ B     C</code></pre></div><p>Service A публікує повідомлення, а підписники його отримують.</p><p>Це може бути зручно для простих real-time сценаріїв.</p><p>Але тут важливо не зробити неправильний висновок:</p><p><strong>Redis Pub/Sub ≠ RabbitMQ.</strong></p><p>Класичний Redis Pub/Sub орієнтований на доставку активним підписникам. Якщо підписник був недоступний у момент публікації, не слід автоматично очікувати поведінки надійної брокерної черги.</p><p>Якщо бізнес-процес вимагає гарантованої обробки повідомлення, необхідно окремо проєктувати механізм доставки.</p><hr></section><section class="article-section" aria-labelledby="section-13"><div class="section-heading"><span class="section-index" aria-hidden="true">13</span><h2 id="section-13">13. А як щодо Redis Streams?</h2></div><p>Redis має і більш потужний механізм — <strong>Streams</strong>.</p><p>Він дозволяє зберігати потік повідомлень та працювати з consumer groups.</p><p>Тобто Redis може використовуватися не тільки для простого Pub/Sub.</p><p>Але звідси не випливає:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Redis Streams = RabbitMQ = Kafka</code></pre></div><p>Ці технології мають різні моделі роботи, можливості та типові сценарії.</p><p>Тому вибір повинен починатися не з:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«Яка технологія у нас вже встановлена?»</div></blockquote><p>а з:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«Яку проблему ми вирішуємо і які гарантії нам потрібні?»</div></blockquote><hr></section><section class="article-section" aria-labelledby="section-14"><div class="section-heading"><span class="section-index" aria-hidden="true">14</span><h2 id="section-14">14. Redis vs Database vs RabbitMQ</h2></div><p>Ці технології не є прямими конкурентами.</p><p>Вони вирішують різні задачі.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Таблиця"><table><thead><tr><th scope="col">Задача</th><th scope="col">Типовий інструмент</th></tr></thead><tbody><tr><td>Бізнес-дані</td><td>PostgreSQL / MS SQL</td></tr><tr><td>Довготривале зберігання</td><td>Database</td></tr><tr><td>Кеш</td><td>Redis</td></tr><tr><td>Сесії</td><td>Redis</td></tr><tr><td>Rate limiting</td><td>Redis</td></tr><tr><td>OTP / тимчасові дані</td><td>Redis</td></tr><tr><td>Лічильники</td><td>Redis</td></tr><tr><td>Distributed coordination</td><td>Redis або спеціалізовані рішення</td></tr><tr><td>Надійна асинхронна доставка повідомлень</td><td>RabbitMQ</td></tr><tr><td>Простий real-time Pub/Sub</td><td>Redis</td></tr><tr><td>Event streaming</td><td>Redis Streams / Kafka та інші залежно від вимог</td></tr></tbody></table></div><p>Тому архітектура цілком може виглядати так:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">                 ┌──── Redis
+                 │
+Client ──► API ──┼──── PostgreSQL
+                 │
+                 └──── RabbitMQ</code></pre></div><p>І це нормально.</p><p>Кожен компонент вирішує свою задачу.</p><hr></section><section class="article-section" aria-labelledby="section-15"><div class="section-heading"><span class="section-index" aria-hidden="true">15</span><h2 id="section-15">15. Що станеться, якщо Redis впаде?</h2></div><p>Це одне з найважливіших питань при проєктуванні.</p><p>Не:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«Чи швидкий Redis?»</div></blockquote><p>А:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>«Що станеться з нашою системою, якщо Redis стане недоступним?»</strong></div></blockquote><p>Відповідь залежить від того, для чого він використовується.</p><h4>Якщо Redis — кеш</h4><p>Можливо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Redis unavailable
+       │
+       ▼
+Database</code></pre></div><p>Система продовжить працювати, але база отримає більше навантаження.</p><h4>Якщо Redis зберігає сесії</h4><p>Користувачі можуть втратити доступ до своїх активних сесій або система не зможе їх перевірити.</p><h4>Якщо Redis використовується для rate limiting</h4><p>Потрібно заздалегідь визначити поведінку:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Redis unavailable
+       │
+       ├── дозволяти запити?
+       │
+       └── блокувати запити?</code></pre></div><p>Це класичний вибір між <strong>fail-open</strong> та <strong>fail-closed</strong>, який залежить від конкретного ризику.</p><h4>Якщо Redis використовується для lock</h4><p>Недоступність Redis може вплинути вже не тільки на продуктивність, а й на коректність бізнес-операцій.</p><p>Тому Redis не можна автоматично вважати «просто кешем, який не страшно втратити».</p><hr></section><section class="article-section" aria-labelledby="section-16"><div class="section-heading"><span class="section-index" aria-hidden="true">16</span><h2 id="section-16">16. А Redis взагалі зберігає дані на диск?</h2></div><p>Так.</p><p>Хоча Redis орієнтований на роботу з RAM, він має механізми persistence.</p><p>Два важливих поняття:</p><p><strong>RDB</strong> — періодичні snapshots стану Redis.</p><p><strong>AOF (Append Only File)</strong> — журнал операцій зміни даних.</p><p>Спрощено:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">            RAM
+             │
+          Redis
+          /   \
+         ▼     ▼
+       RDB    AOF
+         \     /
+          ▼   ▼
+           Disk</code></pre></div><p>Це дозволяє відновлювати дані після перезапуску.</p><p>Але persistence не означає автоматично:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«Тепер Redis можна використовувати замість основної реляційної БД».</div></blockquote><p>Вибір сховища визначається моделлю даних, гарантіями, транзакційністю, обсягами, доступністю та іншими вимогами.</p><hr></section><section class="article-section" aria-labelledby="section-17"><div class="section-heading"><span class="section-index" aria-hidden="true">17</span><h2 id="section-17">17. А якщо сам Redis один?</h2></div><p>Тоді він може стати <strong>Single Point of Failure</strong>.</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     │
+     ▼
+   Redis
+     X</code></pre></div><p>Redis підтримує механізми побудови відмовостійкої інфраструктури.</p><p>Наприклад:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">             Primary
+               │
+        ┌──────┴──────┐
+        ▼             ▼
+     Replica       Replica</code></pre></div><p>Для автоматичного failover може використовуватися <strong>Sentinel</strong>.</p><p>Для розподілу даних між декількома вузлами існує <strong>Redis Cluster</strong>.</p><p>Але це вже окрема інфраструктурна тема.</p><p>Головне розуміти:</p><p><strong>якщо Redis критичний для роботи системи — його доступність також стає частиною архітектури системи.</strong></p><hr></section><section class="article-section" aria-labelledby="section-18"><div class="section-heading"><span class="section-index" aria-hidden="true">18</span><h2 id="section-18">18. Типова помилка: кешувати все</h2></div><p>Після першого успішного використання Redis легко зʼявляється бажання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«А давайте кешувати ще й це».</div></blockquote><p>А потім:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Redis
+├── users
+├── products
+├── permissions
+├── configuration
+├── reports
+├── reference data
+├── sessions
+└── ...</code></pre></div><p>І система поступово отримує дві версії реальності:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Database
+    VS
+Redis</code></pre></div><p>Тоді виникають питання:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Хто source of truth?
+
+Коли оновлювати кеш?
+
+Хто його видаляє?
+
+Який TTL?
+
+Що робити після зміни даних?
+
+Що робити при недоступності Redis?</code></pre></div><p>Тому правильне питання:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div><strong>«Що ми виграємо від кешування саме цих даних?»</strong></div></blockquote><p>Якщо база й так відповідає за 5 мс і має невелике навантаження, Redis може не прискорити систему настільки, щоб виправдати додаткову складність.</p><hr></section><section class="article-section" aria-labelledby="section-19"><div class="section-heading"><span class="section-index" aria-hidden="true">19</span><h2 id="section-19">19. Redis додає швидкість, але й додає складність</h2></div><p>Без Redis:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     │
+     ▼
+Database</code></pre></div><p>З Redis:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Application
+     │
+     ├────► Redis
+     │
+     └────► Database</code></pre></div><p>Тепер потрібно думати про:</p><ul><li>TTL;</li><li>invalidation;</li><li>stale data;</li><li>cache misses;</li><li>memory limits;</li><li>eviction policy;</li><li>persistence;</li><li>replication;</li><li>failover;</li><li>моніторинг;</li><li>доступність;</li><li>безпеку;</li><li>поведінку системи при відмові Redis.</li></ul><p>Тобто Redis — це не «безкоштовна продуктивність».</p><p>Ми обмінюємо:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">частину простоти
+        ↓
+на
+        ↓
+продуктивність і нові можливості</code></pre></div><p>І цей обмін має бути виправданим.</p><hr></section><section class="article-section" aria-labelledby="section-20"><div class="section-heading"><span class="section-index" aria-hidden="true">20</span><h2 id="section-20">20. Що потрібно запамʼятати</h2></div><p>Redis — це значно більше, ніж просто кеш.</p><p>Він добре підходить для:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Cache
+Sessions
+Counters
+Rate Limiting
+TTL data
+OTP
+Distributed coordination
+Pub/Sub
+Streams</code></pre></div><p>Але Redis не потрібно додавати до системи лише тому, що:</p><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">«Redis швидкий»</code></pre></div><p>Перед його використанням варто відповісти щонайменше на пʼять питань:</p><p><strong>1. Яку проблему вирішує Redis?</strong></p><p><strong>2. Які саме дані в ньому зберігатимуться?</strong></p><p><strong>3. Хто є Source of Truth — Redis чи інша система?</strong></p><p><strong>4. Як і коли дані будуть видалятися або оновлюватися?</strong></p><p><strong>5. Що станеться із системою, якщо Redis буде недоступний?</strong></p><p>Якщо відповіді на ці питання зрозумілі — Redis може бути надзвичайно корисним компонентом архітектури.</p><p>Якщо ж єдина аргументація звучить як:</p><blockquote><span class="quote-mark" aria-hidden="true">↳</span><div>«Давайте поставимо Redis, бо він швидкий»,</div></blockquote><p>то, можливо, Redis поки що взагалі не потрібен.</p><hr><h3>Коротко</h3><div class="code-block code-block--plain"><pre tabindex="0"><code class="language-text">Redis ≠ просто кеш
+Redis ≠ заміна SQL
+Redis ≠ RabbitMQ
+Redis ≠ гарантоване прискорення системи
+
+Redis = дуже швидкий інструмент
+        для конкретних архітектурних задач</code></pre></div><p>І, мабуть, найважливіша думка:</p><p><strong>хороша архітектура — це не система, в якій використано якомога більше технологій. Це система, в якій кожна технологія має зрозумілу причину своєї появи.</strong></p></section></article><div class="joker-signature" aria-label="Автор матеріалу Joker"><img class="joker-mark" src="assets/images/joker-cube-logo-v1.png" alt="Авторський знак Joker у світловому кубі" width="64" height="64"><div class="joker-signature-copy"><span class="joker-signature-label">Автор матеріалу · <strong><a class="joker-profile" href="https://www.linkedin.com/in/denys-bolotin-45a922220/" target="_blank" rel="noopener noreferrer" aria-label="Joker — профіль у LinkedIn (відкриється в новій вкладці)">Joker</a></strong></span><span class="joker-signature-note">IT / ПРАКТИКА · Технічні нотатки</span></div></div><footer class="end-note"><span>IT / ПРАКТИКА · 025</span><a href="#top">До початку ↑</a></footer></div></div></main><div class="status" role="status" aria-live="polite"></div></div><script src="assets/js/a2d9670c171975b9f70c.js"></script><script src="assets/js/a39bc17204fe1b6a9715.js"></script><!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"4548d06d74724c949f10a8a96bb207e1"}'></script><!-- End Cloudflare Web Analytics --></body></html>
