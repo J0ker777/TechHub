@@ -1,0 +1,177 @@
+
+const root=document.documentElement, themeToggle=document.querySelector('#theme-toggle');
+try{themeToggle.checked=localStorage.getItem('article-theme')==='light'}catch{}
+themeToggle.addEventListener('change',()=>{try{localStorage.setItem('article-theme',themeToggle.checked?'light':'dark')}catch{}});
+
+const ARTICLE_LEVELS={easy:'Проста',medium:'Середня',hard:'Складна'};
+const ARTICLE_PATHS={
+ difficulty:'<path d="M4 18a9 9 0 1 1 16 0"/><path d="m12 12 4-4"/><circle cx="12" cy="12" r="1.5"/><path d="M4 12h1m14 0h1M7 6l1 1m4-4v1"/>',
+ time:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+ views:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+ heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
+ share:'<path d="m14 3 7 7-7 7v-5c-6 0-9 3-11 8 0-8 3-12 11-12Z"/>'
+};
+function articleIcon(kind){return '<svg class="article-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+ARTICLE_PATHS[kind]+'</svg>';}
+function articleCount(value,compact=false){if(value==null)return '—';const count=Number(value);if(compact&&count>=1000)return new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(count);return String(value);}
+function articleMetric(kind,value,label){const item=document.createElement('span');item.className='article-stat';item.title=label;item.innerHTML=articleIcon(kind);const text=document.createElement('span');text.textContent=value;item.append(text);return item;}
+function articleShare(host,{title,href,compact=false}) {
+ const button=document.createElement('button'),note=document.createElement('span');
+ button.type='button';button.className='article-action';button.innerHTML=articleIcon('share')+(compact?'':'<span>Поділитися</span>');button.title='Поділитися';button.setAttribute('aria-label','Поділитися статтею');
+ note.className='article-feedback';note.setAttribute('role','status');host.append(button,note);
+ button.addEventListener('click',async()=>{
+  const url=new URL(href||location.href,location.href).href;button.disabled=true;note.textContent='';
+  try{
+   if(typeof navigator.share==='function'){try{await navigator.share({title,url});return;}catch(error){if(error.name==='AbortError')return;}}
+   if(navigator.clipboard&&globalThis.isSecureContext){try{await navigator.clipboard.writeText(url);note.textContent='Посилання скопійовано';return;}catch{}}
+   const field=document.createElement('textarea');field.value=url;field.style.cssText='position:fixed;left:-9999px;top:0';document.body.append(field);field.select();let copied=false;
+   try{copied=document.execCommand('copy');}catch{}finally{field.remove();button.focus();}
+   note.textContent=copied?'Посилання скопійовано':'Скопіюйте посилання: '+url;
+  }finally{button.disabled=false;}
+ });
+}
+function articleTools(host,{article,endpoint,reading=false}){
+ host.classList.add('article-tools');
+ const level=articleMetric('difficulty',ARTICLE_LEVELS[article.difficulty]||'Не визначено','Складність статті');
+ level.dataset.level=article.difficulty||'';level.hidden=!ARTICLE_LEVELS[article.difficulty];
+ const minutes=articleMetric('time',article.readingMinutes?'≈ '+article.readingMinutes+' хв':'—','Приблизний час читання');
+ const views=articleMetric('views',articleCount(article.viewCount,!reading),'Перегляди');
+ views.setAttribute('aria-label','Перегляди: '+(article.viewCount??'не завантажено'));
+ host.append(level,minutes,views);
+ const heart=document.createElement('div');host.append(heart);
+ articleHeart(heart,{endpoint,id:article.articleId,initial:article,follow:reading,compact:!reading});
+ articleShare(host,{title:article.title,href:article.href,compact:!reading});
+ function paint(data){
+  level.hidden=!ARTICLE_LEVELS[data.difficulty];level.dataset.level=data.difficulty||'';level.lastElementChild.textContent=ARTICLE_LEVELS[data.difficulty]||'Не визначено';
+  if(data.readingMinutes)minutes.lastElementChild.textContent='≈ '+data.readingMinutes+' хв';
+  data.viewCount=Math.max(Number(views.lastElementChild.textContent)||0,data.viewCount);views.lastElementChild.textContent=String(data.viewCount);views.setAttribute('aria-label','Перегляди: '+data.viewCount);
+ }
+ if(reading&&endpoint){
+  fetch(endpoint+'/articles/'+article.articleId+'/stats').then(r=>{if(!r.ok)throw Error();return r.json();}).then(paint).catch(()=>{views.title='Перегляди тимчасово недоступні';});
+  let sent=false;
+  async function countView(){
+   if(sent||document.visibilityState!=='visible')return;sent=true;
+   let visitorId;try{visitorId=localStorage.getItem('techhub-visitor-v1');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('techhub-visitor-v1',visitorId);}}catch{visitorId=crypto.randomUUID();}
+   try{const r=await fetch(endpoint+'/articles/'+article.articleId+'/views',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId})});if(r.ok)paint(await r.json());}catch{}
+   document.removeEventListener('visibilitychange',countView);
+  }
+  if(document.visibilityState==='visible')countView();else document.addEventListener('visibilitychange',countView);
+ }
+}
+
+function articleHeart(host,{endpoint,id,href='',indicator=false,initial=null,follow=true,compact=false}){
+ const key='techhub-auth-v1',prompt='Увійдіть через Google, щоб оцінити статтю';let busy=false,version=0,liked=false;
+ const button=document.createElement('button'),note=document.createElement('span'),login=document.createElement('a');
+ button.type='button';button.className='article-heart';button.setAttribute('aria-label',indicator?'Оцінки статті':'Подобається стаття');
+ note.setAttribute('role','status');login.href='quizzes.html';login.textContent='Увійти через Google';login.hidden=true;
+ host.classList.add('article-reactions');host.append(button,note,login);
+ function token(){try{return JSON.parse(localStorage.getItem(key)||'null')?.sessionToken||'';}catch{return '';}}
+ function paint(data){liked=!!data?.liked;const count=data?.likeCount??'—';button.setAttribute('aria-label',indicator?'Лайки статті: '+count:liked?'Зняти лайк: '+count:'Подобається стаття: '+count);button.innerHTML=articleIcon('heart');const text=document.createElement('span');text.textContent=articleCount(count,compact);button.append(text);button.title=liked?'Зняти лайк':'Подобається';button.setAttribute('aria-pressed',String(liked));}
+ function askLogin(){note.textContent=prompt;login.hidden=false;}
+ async function refresh(){const current=++version,session=token();try{const response=await fetch(endpoint+'/articles/'+id+'/likes',{headers:session?{Authorization:'Bearer '+session}:{}});if(!response.ok)throw Error();const data=await response.json();if(current===version)paint(data);}catch{if(current===version)note.textContent='Не вдалося завантажити оцінки.';}}
+ paint(initial);if(!endpoint){button.disabled=true;button.title='Лайки доступні на сайті TechHub';}
+ button.addEventListener('click',async()=>{
+  if(busy)return;const session=token();if(!session){askLogin();return;}
+  busy=true;button.disabled=true;note.textContent='';login.hidden=true;++version;
+  try{
+   const me=await fetch(endpoint+'/auth/me',{headers:{Authorization:'Bearer '+session}});
+   if(me.status===401){askLogin();return;}if(!me.ok)throw Error();
+   if(indicator){location.href=href;return;}
+   const response=await fetch(endpoint+'/articles/'+id+'/likes',{method:liked?'DELETE':'POST',headers:{Authorization:'Bearer '+session}});
+   if(response.status===401){askLogin();return;}if(!response.ok)throw Error();paint(await response.json());
+  }catch{note.textContent='Не вдалося зберегти оцінку. Спробуйте ще раз.';}finally{busy=false;button.disabled=false;}
+ });
+ if(!indicator&&endpoint){if(initial?.likeCount==null)refresh();if(follow){window.addEventListener('focus',refresh);window.addEventListener('techhub-auth-changed',refresh);}}
+}
+for(const host of document.querySelectorAll('[data-article-tools]')){
+ const article={articleId:host.dataset.articleTools,title:document.querySelector('h1')?.textContent||document.title,href:document.querySelector('link[rel="canonical"]')?.href||location.href,difficulty:host.dataset.difficulty,readingMinutes:Number(host.dataset.readingMinutes)||null,viewCount:null};
+ articleTools(host,{article,endpoint:host.dataset.reactionApi,reading:true});
+ const end=document.querySelector('[data-article-share-end]');if(end){end.classList.add('article-tools','article-tools-end');articleShare(end,{title:article.title,href:article.href});}
+}
+for(const host of document.querySelectorAll('[data-article-reaction]'))if(host.dataset.reactionApi)articleHeart(host,{endpoint:host.dataset.reactionApi,id:host.dataset.articleReaction});
+
+const QA_API="https://techhub-quiz-api.bolotin-denis.workers.dev";
+const QA_BANK=false;
+const qaJsonl=(function quizJsonl(){
+ const limits={text:2000,explanation:4000,sourceSection:300};
+ function error(message){throw new Error(message);}
+ function validate(q,articleId){
+  if(!q||typeof q!=='object'||Array.isArray(q))error('Очікується об’єкт питання.');
+  if(q.articleId!==articleId)error('articleId має дорівнювати '+articleId+'.');
+  if(typeof q.questionId!=='string'||!/^[a-zA-Z0-9-]{1,80}$/.test(q.questionId))error('Некоректний questionId (латиниця, цифри, дефіси; до 80 символів).');
+  if(!['easy','medium','hard'].includes(q.difficulty))error('difficulty: easy, medium або hard.');
+  const out={questionId:q.questionId,articleId,difficulty:q.difficulty};
+  function field(value,name,max){if(typeof value!=='string'||!value.trim()||value.length>max)error(name+': потрібен непорожній текст до '+max+' символів.');return value.trim();}
+  for(const [name,max] of Object.entries(limits))out[name]=field(q[name],name,max);
+  if(!Array.isArray(q.options)||q.options.length!==4)error('Потрібно рівно 4 варіанти відповіді.');
+  const ids=new Set(),texts=new Set();out.options=q.options.map(o=>{
+   if(!o||typeof o.answerId!=='string'||!/^a[1-4]$/.test(o.answerId)||ids.has(o.answerId))error('Варіанти мають унікальні answerId: a1, a2, a3, a4.');
+   const text=field(o.text,'options.text',1000),key=text.toLocaleLowerCase();if(texts.has(key))error('Тексти відповідей мають відрізнятися.');ids.add(o.answerId);texts.add(key);return {answerId:o.answerId,text};
+  });if(!ids.has(q.correctAnswerId))error('correctAnswerId має вказувати на один із варіантів.');out.correctAnswerId=q.correctAnswerId;return out;
+ }
+ function parse(raw,articleId){
+  if(typeof raw!=='string'||new TextEncoder().encode(raw).length>1000000)error('Файл має бути до 1 МБ.');
+  if(!/^\d{3}$/.test(articleId))error('Оберіть статтю.');
+  const rows=[],issues=[],ids=new Set(),texts=new Set();
+  raw.replace(/^\uFEFF/,'').split(/\r?\n/).forEach((line,index)=>{if(!line.trim())return;try{
+   const q=validate(JSON.parse(line),articleId),key=q.text.toLocaleLowerCase();if(ids.has(q.questionId)||texts.has(key))error('Повтор questionId або тексту питання.');ids.add(q.questionId);texts.add(key);rows.push(q);
+  }catch(e){issues.push('Рядок '+(index+1)+': '+e.message);}});
+  if(issues.length)error(issues.slice(0,20).join('\n'));if(!rows.length)error('Файл не містить питань.');if(rows.length>100)error('У файлі може бути до 100 питань.');return rows;
+ }
+ function merge(existing,rows,articleId,mode){
+  if(!['append','replace'].includes(mode))error('Оберіть режим імпорту.');
+  const kept=mode==='replace'?existing.filter(q=>q.articleId!==articleId):existing.slice();
+  if(kept.length+rows.length>100)error('У квізі може бути до 100 питань. Змініть режим або зменшіть файл.');
+  const ids=new Set(kept.map(q=>q.questionId)),texts=new Set(kept.map(q=>q.text.trim().toLocaleLowerCase()));
+  for(const q of rows){if(q.articleId!==articleId)error('Файл належить іншій статті.');if(ids.has(q.questionId)||texts.has(q.text.toLocaleLowerCase()))error('Питання '+q.questionId+' вже є у квізі (ID або текст).');ids.add(q.questionId);texts.add(q.text.toLocaleLowerCase());}
+  return kept.concat(rows);
+ }
+ function serialize(rows){return rows.map(q=>JSON.stringify(q)).join('\n')+(rows.length?'\n':'');}
+ function template(articleId){return {questionId:'article-'+articleId+'-001',articleId,difficulty:'easy',text:'Замініть текстом питання за статтею',options:[1,2,3,4].map(i=>({answerId:'a'+i,text:'Варіант '+i})),correctAnswerId:'a1',explanation:'Поясніть правильну відповідь',sourceSection:'Назва розділу статті'};}
+ return {parse,merge,serialize,template};
+})();
+
+const qa=id=>document.querySelector('#'+id);let qaAuth=null,qaAuthorized=false,qaBusy=false,qaRows=[],qaArticles=[],qaDraft=null,qaDirty=false,qaQuestionIndex=-1,qaSessionEpoch=0;
+const qaLevels={easy:'Просте',medium:'Середнє',hard:'Складне'};
+let qaImport=null;
+function qaResetImport(){qaImport=null;qa('qa-import-review').hidden=true;qa('qa-replace-confirm').checked=false;qa('qa-import-questions').replaceChildren();}
+function qaTransferArticles(){qaResetImport();const selected=qa('qa-transfer-article').value;qa('qa-transfer-article').replaceChildren(...qaDraft.document.articleIds.map(id=>{const option=document.createElement('option');option.value=id;option.textContent=id+' · '+(qaArticles.find(a=>a.articleId===id)?.title||'');return option;}));qa('qa-transfer-article').value=qaDraft.document.articleIds.includes(selected)?selected:(qaDraft.document.articleIds[0]||'');}
+function qaTransferReady(){if(!qaAuthorized||qaBusy||!qaDraft)return false;if(!qa('qa-question').hidden){qaMessage('Спочатку завершіть редагування питання.');return false;}if(!qaDraft.document.articleIds.includes(qa('qa-transfer-article').value)){qaMessage('Оберіть статтю зі складу квізу.');return false;}return true;}
+function qaDownload(rows,suffix){const articleId=qa('qa-transfer-article').value;if(!rows.length){qaMessage('Для цієї статті ще немає питань. Завантажте шаблон.');return;}const url=URL.createObjectURL(new Blob([qaJsonl.serialize(rows)],{type:'application/x-ndjson;charset=utf-8'})),link=document.createElement('a');link.href=url;const title=qaArticles.find(a=>a.articleId===articleId)?.title||'стаття';link.download=articleId+'-'+title.replace(/[<>:"/\\|?*\x00-\x1f]/g,'-').slice(0,100)+'-'+suffix+'.jsonl';link.click();URL.revokeObjectURL(url);qaMessage('Завантажено '+rows.length+' питань для статті '+articleId+'.');}
+function qaMessage(text,issues=[]){qa('qa-status').textContent=text;qa('qa-issues').replaceChildren(...issues.map(issue=>{const li=document.createElement('li');li.textContent=issue;return li;}));}
+function qaLock(){for(const node of document.querySelectorAll('.quiz-admin-panel button,.quiz-admin-panel input,.quiz-admin-panel textarea,.quiz-admin-panel select'))node.disabled=qaBusy||!qaAuthorized;}
+async function qaRequest(path,options={}){const epoch=qaSessionEpoch;const response=await fetch(QA_API+path,{...options,headers:{Authorization:'Bearer '+qaAuth.sessionToken,...(options.body?{'Content-Type':'application/json'}:{})}});let value={};try{value=await response.json();}catch{}if(epoch!==qaSessionEpoch){const error=new Error('signed_out');error.status=401;throw error;}if(!response.ok){if(response.status===401||response.status===403){qaSessionEpoch++;qaAuthorized=false;qaDraft=null;qa('qa-list').replaceChildren();qa('qa-draft').hidden=qa('qa-question').hidden=qa('qa-create').hidden=true;qaLock();}const error=new Error(value.error||'request_failed');error.status=response.status;error.issues=value.issues||[];throw error;}return value;}
+function qaError(error){qaMessage(error.status===409?'Чернетку вже змінили в іншій вкладці. Збережіть свій текст окремо й відкрийте квіз повторно.':error.status===401||error.status===403?'Сесія недоступна. Увійдіть як адміністратор.':'Не вдалося виконати дію. Перевірте введені дані та спробуйте ще раз.',error.issues);}
+function qaButton(text,action){const b=document.createElement('button');b.type='button';b.className='admin-button';b.textContent=text;b.addEventListener('click',action);return b;}
+function qaCanLeave(){if(qaDirty||!qa('qa-question').hidden){qaMessage('Спочатку збережіть чернетку та застосуйте або скасуйте редагування питання.');return false;}return true;}
+function qaRenderList(){qa('qa-list').replaceChildren(...qaRows.map(item=>{const row=document.createElement('article');row.className='quiz-admin-row';const info=document.createElement('div'),name=document.createElement('strong'),meta=document.createElement('p');name.textContent=item.title;meta.className='quiz-admin-meta';meta.textContent=item.quiz_id+' · '+(item.status==='published'?'Опубліковано':item.status==='archived'?'Приховано':'Чернетка')+' · версія '+(item.version||'—');info.append(name,meta);const actions=document.createElement('div');actions.className='quiz-admin-actions';actions.append(qaButton('Редагувати',()=>qaOpen(item.quiz_id)));if(item.current_version_id){actions.append(qaButton(item.status==='published'?'Приховати':'Показувати',()=>qaVisibility(item)));const link=document.createElement('a');link.className='admin-button';link.href='quiz.html?quiz='+encodeURIComponent(item.quiz_id);link.textContent='Відкрити квіз';actions.append(link);}row.append(info,actions);return row;}));qaLock();}
+async function qaLoad(){if(QA_BANK){const picker=qa('qa-article-picker'),selected=qaDraft?.quizId||'';picker.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Оберіть статтю';picker.append(placeholder,...qaArticles.map(a=>{const option=document.createElement('option');option.value=a.articleId;option.textContent=a.articleId+' · '+a.title;return option;}));picker.value=selected;qaLock();return;}qaRows=(await qaRequest('/admin/quizzes')).quizzes;qaRenderList();}
+function qaSetDraft(item){qaDraft=item;qaDirty=false;qa('qa-draft').hidden=false;qa('qa-question').hidden=true;qa('qa-draft-heading').textContent=(QA_BANK?'Питання статті · ':'Редактор · ')+item.quizId+(QA_BANK?' · '+item.document.title:'');qa('qa-title').value=item.document.title;qa('qa-description').value=item.document.description;qa('qa-version').textContent=QA_BANK?(item.inherited?'Питання з наявних квізів. Збережіть, щоб створити окремий банк статті.':'Ревізія банку: '+item.revision)+' · '+item.document.questions.length+' питань':'Ревізія чернетки: '+item.revision+(item.publishedRevision===item.revision?' · опублікована':' · зміни ще не опубліковані');qaRenderArticles();qaRenderQuestions();qaLock();}
+function qaRenderArticles(){if(QA_BANK)return;qa('qa-articles').replaceChildren(...qaArticles.map(a=>{const label=document.createElement('label');label.className='quiz-admin-article';const input=document.createElement('input');input.type='checkbox';input.checked=qaDraft.document.articleIds.includes(a.articleId);const text=document.createElement('span');text.textContent=a.articleId+' · '+a.title+(a.status==='hidden'?' · Приховано':a.publishedAt&&new Date(a.publishedAt)>new Date()?' · Заплановано':'');input.addEventListener('change',()=>{const ids=qaDraft.document.articleIds;if(input.checked){if(ids.length>=5){input.checked=false;qaMessage('Можна обрати 5 статей.');return;}ids.push(a.articleId);}else{if(qaDraft.document.questions.some(q=>q.articleId===a.articleId)){input.checked=true;qaMessage('Спочатку приберіть або перенесіть питання цієї статті.');return;}ids.splice(ids.indexOf(a.articleId),1);}qaDirty=true;qaTransferArticles();qaMessage('Є незбережені зміни.');});label.append(input,text);return label;}));}
+function qaRenderQuestions(){qaTransferArticles();const term=qa('qa-question-search').value.trim().toLocaleLowerCase();qa('qa-questions').replaceChildren(...qaDraft.document.questions.flatMap((q,index)=>{if(term&&!([q.text,q.articleId,q.difficulty,qaLevels[q.difficulty]].join(' ').toLocaleLowerCase().includes(term)))return [];const row=document.createElement('div');row.className='quiz-question-row';const text=document.createElement('p');text.textContent=(index+1)+'. '+q.articleId+' · '+qaLevels[q.difficulty]+' · '+q.text;const actions=document.createElement('div');actions.className='quiz-admin-actions';actions.append(qaButton('Редагувати',()=>qaOpenQuestion(index)),qaButton('Прибрати',()=>{if(!qa('qa-question').hidden){qaMessage('Спочатку завершіть редагування питання.');return;}qaDraft.document.questions.splice(index,1);qaDirty=true;qaRenderQuestions();qaMessage('Питання прибрано з чернетки. Збережіть зміни.');}));row.append(text,actions);return [row];}));qaLock();}
+async function qaAction(task){if(qaBusy||!qaAuthorized)return;qaBusy=true;qaLock();try{await task();}catch(error){qaError(error);}finally{qaBusy=false;qaLock();}}
+async function qaOpen(id){if(!qaCanLeave())return;await qaAction(async()=>{const data=await qaRequest((QA_BANK?'/admin/article-questions/':'/admin/quizzes/')+id);const item=data.draft||(await qaRequest('/admin/quizzes/'+id+'/draft',{method:'POST'})).draft;qaSetDraft(item);qa('qa-create').hidden=true;qaMessage(QA_BANK?'Банк статті відкрито.': 'Чернетку відкрито. Історія версій: '+data.versions.map(v=>v.version+' ('+v.status+')').join(', '));});}
+async function qaSave(){if(!qaDraft||!qa('qa-draft').checkValidity()){qa('qa-draft').reportValidity();throw Error('invalid_form');}if(!qa('qa-question').hidden)throw new Error('Завершіть питання');qaDraft.document.title=qa('qa-title').value;qaDraft.document.description=qa('qa-description').value;const value=await qaRequest(QA_BANK?'/admin/article-questions/'+qaDraft.quizId:'/admin/quizzes/'+qaDraft.quizId+'/draft',{method:'PUT',body:JSON.stringify({revision:qaDraft.revision,document:qaDraft.document})});qaSetDraft(value.draft);qaMessage(QA_BANK?'Банк статті збережено. Завантажте його в чернетку квізу для оновлення тесту.':'Чернетку збережено. Читачі бачать попередню опубліковану версію.');}
+function qaOpenQuestion(index=-1){if(!qaDraft||qaBusy)return;if(!qa('qa-question').hidden){qaMessage('Спочатку застосуйте або скасуйте поточне питання.');return;}if(index<0&&qaDraft.document.questions.length>=100){qaMessage('У банку може бути до 100 питань.');return;}if(!qaDraft.document.articleIds.length){qaMessage('Спочатку оберіть статті.');return;}qaQuestionIndex=index;const q=index>=0?qaDraft.document.questions[index]:{articleId:qaDraft.document.articleIds[0],difficulty:'easy',text:'',explanation:'',sourceSection:'',correctAnswerId:'a1',options:[1,2,3,4].map(i=>({answerId:'a'+i,text:''}))};qa('qa-q-article').replaceChildren(...qaDraft.document.articleIds.map(id=>{const option=document.createElement('option');option.value=id;option.textContent=id+' · '+(qaArticles.find(a=>a.articleId===id)?.title||'');return option;}));qa('qa-q-article').value=q.articleId;qa('qa-q-level').value=q.difficulty;qa('qa-q-text').value=q.text;qa('qa-q-explanation').value=q.explanation;qa('qa-q-source').value=q.sourceSection;for(let i=1;i<=4;i++){qa('qa-answer-'+i).value=q.options.find(o=>o.answerId==='a'+i)?.text||'';qa('qa-correct-'+i).checked=q.correctAnswerId==='a'+i;}qa('qa-question').hidden=false;qa('qa-q-text').focus();}
+async function qaVisibility(item){if(!qaCanLeave())return;await qaAction(async()=>{await qaRequest('/admin/quizzes/'+item.quiz_id,{method:'PATCH',body:JSON.stringify({status:item.status==='published'?'archived':'published'})});await qaLoad();qaMessage('Видимість квізу оновлено.');});}
+qa('qa-new').addEventListener('click',()=>{if(!qaCanLeave())return;qa('qa-create').hidden=false;qa('qa-draft').hidden=true;qa('qa-new-title').focus();});qa('qa-create-cancel').addEventListener('click',()=>{qa('qa-create').hidden=true;});
+qa('qa-create').addEventListener('submit',event=>{event.preventDefault();qaAction(async()=>{const value=await qaRequest('/admin/quizzes',{method:'POST',body:JSON.stringify({quizId:qa('qa-new-id').value,title:qa('qa-new-title').value})});qa('qa-create').hidden=true;qaSetDraft(value.draft);await qaLoad();qaMessage('Квіз створено як чернетку.');});});
+qa('qa-draft').addEventListener('submit',event=>{event.preventDefault();qaAction(qaSave);});for(const id of ['qa-title','qa-description'])qa(id).addEventListener('input',()=>{qaDirty=true;});
+qa('qa-add-question').addEventListener('click',()=>qaOpenQuestion());qa('qa-question-cancel').addEventListener('click',()=>{qa('qa-question').hidden=true;});
+qa('qa-question').addEventListener('submit',event=>{event.preventDefault();const options=[1,2,3,4].map(i=>({answerId:'a'+i,text:qa('qa-answer-'+i).value.trim()}));if(new Set(options.map(o=>o.text.toLocaleLowerCase())).size!==4){qaMessage('Відповіді мають відрізнятися.');return;}const correct=document.querySelector('input[name="qa-correct"]:checked');if(!correct)return;const old=qaDraft.document.questions[qaQuestionIndex],question={questionId:old?.questionId||'q-'+crypto.randomUUID(),articleId:qa('qa-q-article').value,difficulty:qa('qa-q-level').value,text:qa('qa-q-text').value.trim(),explanation:qa('qa-q-explanation').value.trim(),sourceSection:qa('qa-q-source').value.trim(),correctAnswerId:correct.value,options};if(qaQuestionIndex<0)qaDraft.document.questions.push(question);else qaDraft.document.questions[qaQuestionIndex]=question;qaDirty=true;qa('qa-question').hidden=true;qaRenderQuestions();qaMessage('Питання застосовано. Збережіть чернетку.');});
+qa('qa-question-search').addEventListener('input',()=>{if(qaDraft)qaRenderQuestions();});
+for(const [id,publish] of [['qa-validate',false],['qa-publish',true]])qa(id).addEventListener('click',()=>qaAction(async()=>{if(!qa('qa-question').hidden){qaMessage('Спочатку застосуйте або скасуйте редагування питання.');return;}if(qaDirty)await qaSave();const check=await qaRequest('/admin/quizzes/'+qaDraft.quizId+'/validate',{method:'POST',body:JSON.stringify({revision:qaDraft.revision})});if(!check.valid){qaMessage('Квіз ще не готовий до публікації.',check.issues);return;}if(!publish){qaMessage('Перевірку пройдено: '+check.questionCount+' питань у банку, 20 у проходженні.');return;}const value=await qaRequest('/admin/quizzes/'+qaDraft.quizId+'/publish',{method:'POST',body:JSON.stringify({revision:qaDraft.revision})});qaSetDraft(value.draft);await qaLoad();qaMessage('Нову версію опубліковано. Старі проходження збережено.');}));
+qa('qa-discard').addEventListener('click',()=>qaAction(async()=>{const data=await qaRequest((QA_BANK?'/admin/article-questions/':'/admin/quizzes/')+qaDraft.quizId);qaSetDraft(data.draft);qaMessage('Відновлено збережену чернетку.');}));
+qa('qa-close').addEventListener('click',()=>{if(!qaCanLeave())return;qa('qa-draft').hidden=true;qaDraft=null;if(QA_BANK)qa('qa-article-picker').value='';});qa('qa-reload').addEventListener('click',()=>qaAction(qaLoad));
+window.addEventListener('beforeunload',event=>{if(qaDirty||!qa('qa-question').hidden){event.preventDefault();event.returnValue='';}});
+async function qaInit(){qaLock();try{qaAuth=JSON.parse(localStorage.getItem('techhub-auth-v1')||'null');if(!qaAuth?.sessionToken){qaMessage('Спочатку увійдіть через Google на сторінці тестів.');return;}const me=await qaRequest('/auth/me');if(me.user.role!=='admin'){qaMessage('Керування квізами доступне лише адміністратору.');return;}qaAuthorized=true;qaBusy=true;qaLock();qaArticles=(await qaRequest('/admin/articles')).articles;await qaLoad();qaMessage(QA_BANK?'Оберіть статтю для керування питаннями.':'Завантажено квізів: '+qaRows.length+'.');}catch(error){qaError(error);}finally{qaBusy=false;qaLock();}}
+document.querySelector('[data-auth-logout]')?.addEventListener('click',()=>{qaSessionEpoch++;qaAuthorized=false;qaDirty=false;qaDraft=null;qa('qa-list').replaceChildren();qa('qa-draft').hidden=qa('qa-question').hidden=qa('qa-create').hidden=true;qaLock();qaMessage('Ви вийшли з акаунта.');},{capture:true});
+qa('qa-export').addEventListener('click',()=>{if(qaTransferReady())qaDownload(qaDraft.document.questions.filter(q=>q.articleId===qa('qa-transfer-article').value),'питання');});
+qa('qa-template').addEventListener('click',()=>{if(qaTransferReady())qaDownload([qaJsonl.template(qa('qa-transfer-article').value)],'шаблон');});
+for(const id of ['qa-transfer-article','qa-import-mode','qa-import-file'])qa(id).addEventListener('change',qaResetImport);
+qa('qa-import-cancel').addEventListener('click',qaResetImport);
+qa('qa-import-preview').addEventListener('click',()=>{if(!qaTransferReady())return;qaResetImport();const file=qa('qa-import-file').files?.[0];if(!file){qaMessage('Оберіть файл JSONL.');return;}if(file.size>1000000){qaMessage('Файл має бути до 1 МБ.');return;}const item=qaDraft,epoch=qaSessionEpoch,articleId=qa('qa-transfer-article').value,mode=qa('qa-import-mode').value;qaAction(async()=>{try{const raw=new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer());if(epoch!==qaSessionEpoch||!qaAuthorized||qaDraft!==item)return;const rows=qaJsonl.parse(raw,articleId),merged=qaJsonl.merge(item.document.questions,rows,articleId,mode),oldCount=item.document.questions.filter(q=>q.articleId===articleId).length;qaImport={articleId,mode,merged,snapshot:JSON.stringify(item.document)};qa('qa-import-summary').textContent='Стаття '+articleId+': '+rows.length+' питань із файлу. '+(mode==='replace'?'Буде замінено '+oldCount+' питань.':'Буде додано '+rows.length+' питань.')+' Разом у квізі: '+merged.length+'.';qa('qa-import-questions').replaceChildren(...rows.map(q=>{const li=document.createElement('li');li.textContent=qaLevels[q.difficulty]+' · '+q.text;return li;}));qa('qa-replace-label').hidden=mode!=='replace';qa('qa-import-review').hidden=false;qaMessage('Файл перевірено. Перегляньте питання й застосуйте імпорт.');}catch(e){qaResetImport();qaMessage('Імпорт не застосовано.',e.message.split('\n'));}});});
+qa('qa-import-apply').addEventListener('click',()=>{if(!qaTransferReady()||!qaImport)return;if(qaImport.articleId!==qa('qa-transfer-article').value||qaImport.mode!==qa('qa-import-mode').value||qaImport.snapshot!==JSON.stringify(qaDraft.document)){qaResetImport();qaMessage('Чернетка змінилася. Перевірте файл повторно.');return;}if(qaImport.mode==='replace'&&!qa('qa-replace-confirm').checked){qaMessage('Підтвердіть заміну питань цієї статті.');return;}qaDraft.document.questions=qaImport.merged;qaDirty=true;qaRenderQuestions();qaMessage('Імпорт застосовано до чернетки. Збережіть її; для читачів опублікуйте нову версію.');});
+
+if(QA_BANK)qa('qa-article-picker').addEventListener('change',async()=>{const id=qa('qa-article-picker').value;if(!qaCanLeave()||!id){qa('qa-article-picker').value=qaDraft?.quizId||'';return;}const previous=qaDraft?.quizId||'';await qaOpen(id);qa('qa-article-picker').value=qaDraft?.quizId||previous;});
+qa('qa-load-banks').addEventListener('click',()=>{if(QA_BANK||!qaDraft||!qa('qa-question').hidden)return;if(!qaDraft.document.articleIds.length){qaMessage('Спочатку оберіть статті.');return;}if(qaDraft.document.questions.length&&!window.confirm('Замінити питання чернетки збереженими питаннями вибраних статей?'))return;qaAction(async()=>{const ids=qaDraft.document.articleIds.slice(),banks=await Promise.all(ids.map(id=>qaRequest('/admin/article-questions/'+id)));let questions=[];try{for(let i=0;i<banks.length;i++)questions=qaJsonl.merge(questions,banks[i].draft.document.questions,ids[i],'append');}catch(e){qaMessage('Питання не завантажено.',[e.message]);return;}qaDraft.document.questions=questions;qaDirty=true;qaRenderQuestions();qaMessage('Завантажено '+questions.length+' питань зі статей. Збережіть чернетку та перевірте її перед публікацією.');});});
+qaInit();
