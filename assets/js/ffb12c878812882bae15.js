@@ -1,13 +1,13 @@
-const LIKE_API="https://techhub-quiz-api.bolotin-denis.workers.dev",ARTICLE_ORIGIN="https://techhub-quiz-api.bolotin-denis.workers.dev";
+const LIKE_API="https://techhub-quiz-api.bolotin-denis.workers.dev",ARTICLE_ORIGINS=["https://articles.jokerhub.com.ua","https://techhub-quiz-api.bolotin-denis.workers.dev"];
 
 (()=>{
  const params=new URL(location.href).searchParams,id=params.get('article'),state=params.get('state'),status=document.querySelector('#article-like-status'),login=document.querySelector('#article-like-login');
- let running=false;
- const send=data=>window.opener?.postMessage({...data,state,articleId:id},ARTICLE_ORIGIN);
+ let running=false,articleOrigin=null;
+ const send=data=>{for(const origin of articleOrigin?[articleOrigin]:ARTICLE_ORIGINS)window.opener?.postMessage({...data,state,articleId:id},origin);};
  if(!/^\d{3}$/.test(id||'')||!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(state||'')||!window.opener){status.textContent='Відкрийте цю дію кнопкою лайка у статті.';return;}
  window.addEventListener('message',async event=>{
-  if(running||event.origin!==ARTICLE_ORIGIN||event.source!==window.opener||event.data?.type!=='jokerhub-like-start'||event.data.state!==state||event.data.articleId!==id)return;
-  running=true;status.textContent='Перевіряємо вхід…';
+  if(running||!ARTICLE_ORIGINS.includes(event.origin)||event.source!==window.opener||event.data?.type!=='jokerhub-like-start'||event.data.state!==state||event.data.articleId!==id)return;
+  articleOrigin=event.origin;running=true;status.textContent='Перевіряємо вхід…';
   try{
    const cached=sessionStorage.getItem('jokerhub-like:'+state);
    if(cached){send({type:'jokerhub-like-result',...JSON.parse(cached)});window.close();return;}
