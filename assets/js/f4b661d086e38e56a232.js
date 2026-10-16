@@ -1,0 +1,14 @@
+(()=>{
+const API="https://techhub-quiz-api.bolotin-denis.workers.dev",KEY='techhub-auth-v1',box=document.querySelector('[data-auth-profile]');if(!box)return;
+const avatar=box.querySelector('[data-auth-avatar]'),fallback=box.querySelector('[data-auth-fallback]'),name=box.querySelector('[data-auth-name]'),logout=box.querySelector('[data-auth-logout]');let current=null,generation=0;
+function initials(value){return String(value||'?').trim().split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toLocaleUpperCase('uk')||'?'}
+function showAvatar(value){fallback.textContent=initials(name.textContent);fallback.hidden=false;avatar.hidden=true;avatar.removeAttribute('src');if(!value)return;avatar.onload=()=>{avatar.hidden=false;fallback.hidden=true};avatar.onerror=()=>{avatar.hidden=true;fallback.hidden=false};avatar.src=value;}
+function show(value){current=value;if(!value?.sessionToken){box.hidden=true;return;}name.textContent=value.leaderboardName||value.user?.displayName||'Користувач';showAvatar(value.user?.avatarUrl);box.hidden=false;}
+function stored(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null;}}
+function clearStored(){try{localStorage.removeItem(KEY)}catch{}}
+async function validate(){const version=++generation,saved=stored();if(!saved?.sessionToken){show(null);return;}const active=()=>version===generation&&stored()?.sessionToken===saved.sessionToken;try{const response=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+saved.sessionToken}});if(!active())return;if(response.status===401){clearStored();show(null);return;}if(!response.ok){show(saved);return;}const data=await response.json();if(!active())return;const updated={...stored(),expiresAt:data.expiresAt,user:data.user};localStorage.setItem(KEY,JSON.stringify(updated));show(updated);}catch{if(active())show(saved);}}
+window.addEventListener('techhub-auth-changed',event=>{generation++;show(event.detail);});
+window.addEventListener('storage',event=>{if(event.key===KEY||event.key===null)validate();});
+logout.addEventListener('click',async()=>{generation++;const token=current?.sessionToken||stored()?.sessionToken;clearStored();show(null);window.dispatchEvent(new CustomEvent('techhub-auth-changed',{detail:null}));if(token)try{await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+token}})}catch{}if(!stored()?.sessionToken&&/(?:^|\/)(?:quizzes|quiz|quiz-[^/]+|article-test|leaderboard)\.html$/.test(location.pathname))location.href='quizzes.html';});
+validate();
+})();
