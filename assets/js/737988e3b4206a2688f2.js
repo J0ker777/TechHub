@@ -107,25 +107,26 @@ function initHomeVideo(){
  const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
  const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
  const layer=document.createElement('div');layer.className='home-video-layer';layer.setAttribute('aria-hidden','true');
- const video=document.createElement('video');video.muted=true;video.defaultMuted=true;video.loop=true;video.playsInline=true;video.preload='none';video.setAttribute('muted','');video.setAttribute('playsinline','');video.disablePictureInPicture=true;video.tabIndex=-1;layer.append(video);intro.prepend(layer);
+ const video=document.createElement('video');video.muted=true;video.defaultMuted=true;video.loop=false;video.playsInline=true;video.preload='none';video.setAttribute('muted','');video.setAttribute('playsinline','');video.disablePictureInPicture=true;video.tabIndex=-1;layer.append(video);intro.prepend(layer);
  const button=document.createElement('button');button.type='button';button.className='home-video-toggle';button.textContent='Відтворити фон';button.setAttribute('aria-label','Відтворити фонове відео');intro.append(button);
- let wanted=false,manual=false,inView=intro.getBoundingClientRect().bottom>0&&intro.getBoundingClientRect().top<window.innerHeight,loadingTimer,stallTimer;
+ let completed=false,wanted=false,manual=false,inView=intro.getBoundingClientRect().bottom>0&&intro.getBoundingClientRect().top<window.innerHeight,loadingTimer,stallTimer;
  function clearTimers(){clearTimeout(loadingTimer);clearTimeout(stallTimer);}
  function showPlaying(playing){layer.classList.toggle('is-playing',playing);button.textContent=playing?'Зупинити фон':'Відтворити фон';button.setAttribute('aria-label',playing?'Зупинити фонове відео':'Відтворити фонове відео');}
  function pause(){clearTimers();video.pause();showPlaying(false);}
  function stop(){wanted=false;pause();video.removeAttribute('src');video.load();}
  function fastConnection(){return !!connection&&!connection.saveData&&connection.effectiveType==='4g'&&(!Number.isFinite(connection.downlink)||connection.downlink>=2.5)&&(!Number.isFinite(connection.rtt)||connection.rtt<=300);}
  function play(){
-  if(!wanted||!inView||document.hidden)return;
+  if(completed||!wanted||!inView||document.hidden)return;
   if(!video.hasAttribute('src')){video.src='assets/videos/joker-lab-background-v1.mp4';video.load();}
   clearTimers();loadingTimer=setTimeout(stop,6000);
   const promise=video.play();if(promise)promise.catch(()=>{if(wanted&&inView&&!document.hidden)stop();});
  }
  video.addEventListener('playing',()=>{clearTimers();if(wanted&&inView&&!document.hidden)showPlaying(true);else pause();});
  video.addEventListener('error',stop);
+ video.addEventListener('ended',()=>{completed=true;stop();button.hidden=true;});
  video.addEventListener('waiting',()=>{if(wanted){clearTimeout(stallTimer);stallTimer=setTimeout(stop,3000);}});
- button.addEventListener('click',()=>{manual=true;if(wanted){stop();}else{wanted=true;play();}});
- function auto(){if(manual)return;wanted=!motion.matches&&fastConnection();if(wanted)play();else stop();}
+ button.addEventListener('click',()=>{if(completed)return;manual=true;if(wanted){stop();}else{wanted=true;play();}});
+ function auto(){if(completed||manual)return;wanted=!motion.matches&&fastConnection();if(wanted)play();else stop();}
  connection?.addEventListener?.('change',()=>{manual=false;auto();});motion.addEventListener('change',()=>{manual=false;auto();});
  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else play();});
  if(typeof IntersectionObserver!=='undefined')new IntersectionObserver(entries=>{inView=entries[0].isIntersecting;if(inView)play();else pause();}).observe(intro);
