@@ -1,0 +1,332 @@
+
+const root=document.documentElement, themeToggle=document.querySelector('#theme-toggle');
+try{themeToggle.checked=localStorage.getItem('article-theme')==='light'}catch{}
+function applySiteTheme(theme){if(theme==='light'||theme==='dark')themeToggle.checked=theme==='light';}
+themeToggle.addEventListener('change',()=>{const theme=themeToggle.checked?'light':'dark';try{localStorage.setItem('article-theme',theme)}catch{}window.dispatchEvent(new CustomEvent('techhub-theme-changed',{detail:{theme}}));});
+window.addEventListener('techhub-apply-theme',event=>{applySiteTheme(event.detail?.theme);try{localStorage.setItem('article-theme',event.detail.theme)}catch{}});
+window.addEventListener('storage',event=>{if(event.key==='article-theme'||event.key===null){try{applySiteTheme(localStorage.getItem('article-theme')||'dark')}catch{}}});
+
+const ARTICLE_LEVELS={easy:'Проста',medium:'Середня',hard:'Складна'};
+const ARTICLE_PATHS={
+ difficulty:'<path d="M4 18a9 9 0 1 1 16 0"/><path d="m12 12 4-4"/><circle cx="12" cy="12" r="1.5"/><path d="M4 12h1m14 0h1M7 6l1 1m4-4v1"/>',
+ time:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+ views:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+ heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
+ share:'<path d="m14 3 7 7-7 7v-5c-6 0-9 3-11 8 0-8 3-12 11-12Z"/>'
+};
+function articleIcon(kind){return '<svg class="article-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+ARTICLE_PATHS[kind]+'</svg>';}
+function articleCount(value,compact=false){if(value==null)return '—';const count=Number(value);if(compact&&count>=1000)return new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(count);return String(value);}
+function articleMetric(kind,value,label){const item=document.createElement('span');item.className='article-stat';item.title=label;item.innerHTML=articleIcon(kind);const text=document.createElement('span');text.textContent=value;item.append(text);return item;}
+function articleShare(host,{title,href,compact=false}) {
+ const button=document.createElement('button'),note=document.createElement('span');
+ button.type='button';button.className='article-action';button.innerHTML=articleIcon('share')+(compact?'':'<span>Поділитися</span>');button.title='Поділитися';button.setAttribute('aria-label','Поділитися статтею');
+ note.className='article-feedback';note.setAttribute('role','status');host.append(button,note);
+ button.addEventListener('click',async()=>{
+  const url=new URL(href||location.href,location.href).href;button.disabled=true;note.textContent='';
+  try{
+   if(typeof navigator.share==='function'){try{await navigator.share({title,url});return;}catch(error){if(error.name==='AbortError')return;}}
+   if(navigator.clipboard&&globalThis.isSecureContext){try{await navigator.clipboard.writeText(url);note.textContent='Посилання скопійовано';return;}catch{}}
+   const field=document.createElement('textarea');field.value=url;field.style.cssText='position:fixed;left:-9999px;top:0';document.body.append(field);field.select();let copied=false;
+   try{copied=document.execCommand('copy');}catch{}finally{field.remove();button.focus();}
+   note.textContent=copied?'Посилання скопійовано':'Скопіюйте посилання: '+url;
+  }finally{button.disabled=false;}
+ });
+}
+function articleTools(host,{article,endpoint,reading=false}){
+ host.classList.add('article-tools');
+ const level=articleMetric('difficulty',ARTICLE_LEVELS[article.difficulty]||'Не визначено','Складність статті');
+ level.dataset.level=article.difficulty||'';level.hidden=!ARTICLE_LEVELS[article.difficulty];
+ const minutes=articleMetric('time',article.readingMinutes?'≈ '+article.readingMinutes+' хв':'—','Приблизний час читання');
+ const views=articleMetric('views',articleCount(article.viewCount,!reading),'Перегляди');
+ views.setAttribute('aria-label','Перегляди: '+(article.viewCount??'не завантажено'));
+ host.append(level,minutes,views);
+ const heart=document.createElement('div');host.append(heart);
+ articleHeart(heart,{endpoint,id:article.articleId,initial:article,follow:reading,compact:!reading});
+ articleShare(host,{title:article.title,href:article.href,compact:!reading});
+ function paint(data){
+  level.hidden=!ARTICLE_LEVELS[data.difficulty];level.dataset.level=data.difficulty||'';level.lastElementChild.textContent=ARTICLE_LEVELS[data.difficulty]||'Не визначено';
+  if(data.readingMinutes)minutes.lastElementChild.textContent='≈ '+data.readingMinutes+' хв';
+  data.viewCount=Math.max(Number(views.lastElementChild.textContent)||0,data.viewCount);views.lastElementChild.textContent=String(data.viewCount);views.setAttribute('aria-label','Перегляди: '+data.viewCount);
+ }
+ if(reading&&endpoint){
+  fetch(endpoint+'/articles/'+article.articleId+'/stats').then(r=>{if(!r.ok)throw Error();return r.json();}).then(paint).catch(()=>{views.title='Перегляди тимчасово недоступні';});
+  let sent=false;
+  async function countView(){
+   if(sent||document.visibilityState!=='visible'||document.querySelector?.('#member-gate'))return;sent=true;
+   let visitorId;try{visitorId=localStorage.getItem('techhub-visitor-v1');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('techhub-visitor-v1',visitorId);}}catch{visitorId=crypto.randomUUID();}
+   try{const r=await fetch(endpoint+'/articles/'+article.articleId+'/views',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId})});if(r.ok)paint(await r.json());}catch{}
+   document.removeEventListener('visibilitychange',countView);
+  }
+  if(document.visibilityState==='visible')countView();else document.addEventListener('visibilitychange',countView);
+  window.addEventListener('techhub-member-content-loaded',countView,{once:true});
+ }
+}
+
+function articleHeart(host,{endpoint,id,href='',indicator=false,initial=null,follow=true,compact=false}){
+ const key='techhub-auth-v1',prompt='Увійдіть через Google, щоб оцінити статтю';let busy=false,version=0,liked=false;
+ const button=document.createElement('button'),note=document.createElement('span'),login=document.createElement('a');
+ button.type='button';button.className='article-heart';button.setAttribute('aria-label',indicator?'Оцінки статті':'Подобається стаття');
+ note.setAttribute('role','status');login.href='quizzes.html';login.textContent='Увійти через Google';login.hidden=true;
+ host.classList.add('article-reactions');host.append(button,note,login);
+ function token(){try{return JSON.parse(localStorage.getItem(key)||'null')?.sessionToken||'';}catch{return '';}}
+ function paint(data){liked=!!data?.liked;const count=data?.likeCount??'—';button.setAttribute('aria-label',indicator?'Лайки статті: '+count:liked?'Зняти лайк: '+count:'Подобається стаття: '+count);button.innerHTML=articleIcon('heart');const text=document.createElement('span');text.textContent=articleCount(count,compact);button.append(text);button.title=liked?'Зняти лайк':'Подобається';button.setAttribute('aria-pressed',String(liked));}
+ function askLogin(){note.textContent=prompt;login.hidden=false;}
+ async function refresh(){const current=++version,session=token();try{const response=await fetch(endpoint+'/articles/'+id+'/likes',{headers:session?{Authorization:'Bearer '+session}:{}});if(!response.ok)throw Error();const data=await response.json();if(current===version)paint(data);}catch{if(current===version)note.textContent='Не вдалося завантажити оцінки.';}}
+ paint(initial);if(!endpoint){button.disabled=true;button.title='Лайки доступні на сайті TechHub';}
+ button.addEventListener('click',async()=>{
+  if(busy)return;const session=token();if(!session){askLogin();return;}
+  busy=true;button.disabled=true;note.textContent='';login.hidden=true;++version;
+  try{
+   const me=await fetch(endpoint+'/auth/me',{headers:{Authorization:'Bearer '+session}});
+   if(me.status===401){askLogin();return;}if(!me.ok)throw Error();
+   if(indicator){location.href=href;return;}
+   const response=await fetch(endpoint+'/articles/'+id+'/likes',{method:liked?'DELETE':'POST',headers:{Authorization:'Bearer '+session}});
+   if(response.status===401){askLogin();return;}if(!response.ok)throw Error();paint(await response.json());
+  }catch{note.textContent='Не вдалося зберегти оцінку. Спробуйте ще раз.';}finally{busy=false;button.disabled=false;}
+ });
+ if(!indicator&&endpoint){if(initial?.likeCount==null)refresh();if(follow){window.addEventListener('focus',refresh);window.addEventListener('techhub-auth-changed',refresh);}}
+}
+for(const host of document.querySelectorAll('[data-article-tools]')){
+ const article={articleId:host.dataset.articleTools,title:document.querySelector('h1')?.textContent||document.title,href:document.querySelector('link[rel="canonical"]')?.href||location.href,difficulty:host.dataset.difficulty,readingMinutes:Number(host.dataset.readingMinutes)||null,viewCount:null};
+ articleTools(host,{article,endpoint:host.dataset.reactionApi,reading:true});
+ const end=document.querySelector('[data-article-share-end]');if(end){end.classList.add('article-tools','article-tools-end');articleShare(end,{title:article.title,href:article.href});}
+}
+for(const host of document.querySelectorAll('[data-article-reaction]'))if(host.dataset.reactionApi)articleHeart(host,{endpoint:host.dataset.reactionApi,id:host.dataset.articleReaction});
+
+(()=>{
+const ENDPOINT="https://techhub-quiz-api.bolotin-denis.workers.dev",ADMIN=true;
+
+const list=document.querySelector('#radar-list'),status=document.querySelector('#radar-status');
+const topicSidebar=document.querySelector('#radar-topic-sidebar'),topicMobile=document.querySelector('#radar-topic-mobile'),topicButtons=document.querySelector('#radar-topic-buttons'),topicSelect=document.querySelector('#radar-topic-select');
+let selectedTopic=topicFromUrl();
+function topicFromUrl(){const value=new URL(window.location.href).searchParams.get('topic');return value==='unassigned'||/^[1-9]\d*$/.test(value||'')?value:'all';}
+function hideTopicNavigation(){if(topicSidebar)topicSidebar.hidden=true;if(topicMobile)topicMobile.hidden=true;topicButtons?.replaceChildren();topicSelect?.replaceChildren();}
+function chooseTopic(value){if(ADMIN)return;selectedTopic=value;const url=new URL(window.location.href);if(value==='all')url.searchParams.delete('topic');else url.searchParams.set('topic',value);if(url.href!==window.location.href)window.history.pushState(window.history.state,'',url.href);renderEvents();}
+topicSelect?.addEventListener('change',()=>chooseTopic(topicSelect.value));
+function renderTopicNavigation(events){
+ if(ADMIN||!topicSidebar||!topicButtons||!topicSelect||!topicMobile)return;
+ const groups=new Map();let unassigned=0;for(const event of events){if(event.topicId==null){unassigned++;continue;}const id=String(event.topicId);const item=groups.get(id)||{value:id,name:event.topicName||'Тема '+id,count:0};item.count++;groups.set(id,item);}
+ const options=[{value:'all',name:'Усі теми',count:events.length},...[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'uk')),...(unassigned?[{value:'unassigned',name:'Без теми',count:unassigned}]:[])];
+ if(!options.some(item=>item.value===selectedTopic))selectedTopic='all';
+ topicButtons.replaceChildren();topicSelect.replaceChildren();for(const item of options){const button=element('button',undefined,'radar-topic-button');button.type='button';button.setAttribute('aria-pressed',String(item.value===selectedTopic));button.setAttribute('aria-controls','radar-list');button.dataset.topic=item.value;button.append(element('span',item.name),element('span',String(item.count),'radar-topic-count'));button.addEventListener('click',()=>chooseTopic(item.value));topicButtons.append(button);const option=element('option',item.name+' ('+item.count+')');option.value=item.value;topicSelect.append(option);}topicSelect.value=selectedTopic;topicSidebar.hidden=false;topicMobile.hidden=false;
+}
+let generation=0,canModerate=false;
+const moderationBusy=new Set();
+const settingsPanel=document.querySelector('#radar-settings'),settingsStatus=document.querySelector('#mcp-status'),settingsToggle=document.querySelector('#mcp-toggle'),authToggle=document.querySelector('#mcp-auth-required'),autoApproveToggle=document.querySelector('#radar-auto-approve');
+let mcpEnabled=false,authRequired=true,autoApprove=false,settingsBusy=false;
+function disableSettings(){if(settingsToggle)settingsToggle.disabled=true;if(authToggle)authToggle.disabled=true;if(autoApproveToggle)autoApproveToggle.disabled=true;}
+function hideSettings(){if(settingsPanel)settingsPanel.hidden=true;disableSettings();hideManagement();}
+function showSettings(data){mcpEnabled=data.mcpEnabled;authRequired=data.mcpAuthRequired!==false;autoApprove=data.autoApproveRadarEvents===true;settingsStatus.textContent=(mcpEnabled?'MCP увімкнений':'MCP вимкнений')+' · '+(authRequired?'авторизація OAuth':'без авторизації')+' · '+(autoApprove?'автоматична публікація':'ручна модерація');settingsToggle.textContent=mcpEnabled?'Вимкнути MCP':'Увімкнути MCP';settingsToggle.disabled=false;if(authToggle){authToggle.checked=authRequired;authToggle.disabled=false;}if(autoApproveToggle){autoApproveToggle.checked=autoApprove;autoApproveToggle.disabled=false;}}
+async function loadSettings(current){if(!ADMIN||!settingsPanel)return;settingsPanel.hidden=false;disableSettings();settingsStatus.textContent='Перевіряємо стан…';try{const data=await api('/admin/radar/settings');if(current===generation)showSettings(data);}catch{if(current!==generation)return;settingsStatus.textContent='Не вдалося прочитати налаштування Radar. Оновіть сторінку.';disableSettings();}}
+async function saveSettings(update){if(settingsBusy)return;settingsBusy=true;disableSettings();const current=generation;try{const data=await api('/admin/radar/settings',{method:'PATCH',body:JSON.stringify(update)});if(current===generation)showSettings(data);}catch(error){if(current!==generation)return;if(authToggle)authToggle.checked=authRequired;if(autoApproveToggle)autoApproveToggle.checked=autoApprove;settingsStatus.textContent='Не вдалося змінити налаштування Radar. Оновіть сторінку для перевірки.';disableSettings();if([401,403].includes(error.status))hideSettings();}finally{settingsBusy=false;}}
+settingsToggle?.addEventListener('click',()=>saveSettings({mcpEnabled:!mcpEnabled}));
+authToggle?.addEventListener('change',()=>saveSettings({mcpAuthRequired:authToggle.checked}));
+autoApproveToggle?.addEventListener('change',()=>saveSettings({autoApproveRadarEvents:autoApproveToggle.checked}));
+const priorities={critical:'🔴 Критично',interesting:'🟡 Цікаво',useful:'🔵 Корисно'};
+const management=document.querySelector('#radar-management');
+let topics=[],runPage=1,runFilter={},managementVersion=0,historyVersion=0;
+function hideManagement(){managementVersion++;topics=[];if(management){management.hidden=true;document.querySelector('#radar-topics-panel').replaceChildren();document.querySelector('#radar-runs-panel').replaceChildren();document.querySelector('#radar-stats').replaceChildren();}}
+function managementMessage(text){if(management)document.querySelector('#radar-management-status').textContent=text;}
+function action(text,fn){const button=element('button',text,'page-button');button.type='button';button.addEventListener('click',async()=>{if(button.disabled)return;button.disabled=true;try{await fn();}catch(error){managementMessage(error.status===409?'Тема має історію запусків. Вимкніть її, щоб зберегти історію.':'Не вдалося виконати дію. Перевірте дані та доступ адміністратора.');}finally{button.disabled=false;}});return button;}
+function topicForm(topic){
+ const panel=document.querySelector('#radar-topics-panel'),old=panel.querySelector('form');old?.remove();
+ const form=element('form',undefined,'radar-form'),inputs={};form.append(element('h3',topic?'Редагувати тематику':'Нова тематика'));
+ for(const [key,label,max] of [['name','Назва',200],['description','Опис: що шукати',10000],['searchInstructions','Інструкції для AI',20000],['intervalMinutes','Періодичність у хвилинах'],['minScore','Мінімальна оцінка (0–100)'],['maxResults','Максимум матеріалів (1–50)'],['isActive','Активна']]){
+  const wrap=element('label',label),input=element(['description','searchInstructions'].includes(key)?'textarea':'input');input.name=key;
+  if(max){input.maxLength=max;input.required=true;input.value=topic?.[key]||'';}
+  else if(key==='isActive'){input.type='checkbox';input.checked=topic?.isActive??true;}
+  else{input.type='number';input.required=true;input.min=key==='minScore'?0:1;input.max=key==='intervalMinutes'?525600:key==='minScore'?100:50;input.step=1;input.value=topic?.[key]??({intervalMinutes:180,minScore:75,maxResults:5}[key]);}
+  wrap.append(input);form.append(wrap);inputs[key]=input;
+  if(key==='intervalMinutes'){const presets=element('div',undefined,'radar-actions');for(const hours of [1,3,6,12,24])presets.append(action(hours+' год',()=>{input.value=hours*60;}));form.append(presets);}
+ }
+ const buttons=element('div',undefined,'radar-actions'),save=element('button','Зберегти','quiz-link');save.type='submit';buttons.append(save,action('Скасувати',()=>form.remove()));form.append(buttons);
+ form.addEventListener('submit',async event=>{event.preventDefault();if(save.disabled)return;const body={};for(const [key,input] of Object.entries(inputs))body[key]=key==='isActive'?input.checked:['intervalMinutes','minScore','maxResults'].includes(key)?Number(input.value):input.value;save.disabled=true;
+  const version=managementVersion;try{await api('/admin/radar/topics'+(topic?'/'+topic.id:''),{method:topic?'PATCH':'POST',body:JSON.stringify(body)});if(version!==managementVersion)return;await loadManagement();managementMessage('Тематику збережено.');}catch{if(version===managementVersion)managementMessage('Не вдалося зберегти. Перевірте поля та доступ адміністратора.');}finally{save.disabled=false;}
+ });panel.prepend(form);inputs.name.focus();
+}
+function table(headers,caption){const wrap=element('div',undefined,'radar-table-wrap'),table=element('table',undefined,'radar-table'),head=element('thead'),row=element('tr'),body=element('tbody');table.append(element('caption',caption));for(const title of headers){const th=element('th',title);th.scope='col';row.append(th);}head.append(row);table.append(head,body);wrap.append(table);return {wrap,body,label:()=>{for(const row of body.children)for(let index=0;index<row.children.length;index++)row.children[index].setAttribute('data-label',headers[index]);}};}
+function showTopics(){
+ historyVersion++;
+ document.querySelector('#radar-topics-tab').className='quiz-link';document.querySelector('#radar-runs-tab').className='page-button';
+ const panel=document.querySelector('#radar-topics-panel');panel.hidden=false;document.querySelector('#radar-runs-panel').hidden=true;panel.replaceChildren(action('Створити тематику',()=>topicForm()),action('Ручний запуск',manualForm));
+ const {wrap,body,label}=table(['Тематика','Активна','Інтервал','Мін. оцінка','Макс. матеріалів','Останній успіх','Дії'],'Тематики пошуку');
+ for(const topic of topics){const row=element('tr');for(const text of [topic.name,topic.isActive?'Так':'Ні',topic.intervalMinutes+' хв',topic.minScore,topic.maxResults,topic.lastSuccessfulSearchAt?new Date(topic.lastSuccessfulSearchAt).toLocaleString('uk-UA'):'Ще не було'])row.append(element('td',String(text)));
+  const cell=element('td'),buttons=element('div',undefined,'radar-actions');buttons.append(action('Редагувати',()=>topicForm(topic)),action(topic.isActive?'Вимкнути':'Увімкнути',async()=>{await api('/admin/radar/topics/'+topic.id,{method:'PATCH',body:JSON.stringify({isActive:!topic.isActive})});await loadManagement();}),action('Історія',()=>{runFilter={topicId:String(topic.id)};runPage=1;return showRuns();}),action('Видалити',async()=>{if(!window.confirm('Видалити тематику? Тематики з історією можна лише вимкнути.'))return;await api('/admin/radar/topics/'+topic.id,{method:'DELETE'});await loadManagement();}));cell.append(buttons);row.append(cell);body.append(row);
+ }label();panel.append(wrap);if(!topics.length)panel.append(element('p','Тематик поки немає.'));
+}
+function manualForm(){
+ const panel=document.querySelector('#radar-topics-panel');panel.querySelector('form')?.remove();const form=element('form',undefined,'radar-form');
+ form.append(element('h3','Ручний запуск'),element('p','Завдання отримає ChatGPT під час наступного виклику MCP. Ручні й тестові запуски не змінюють регулярний розклад. Події проходять чинну модерацію; тестовий режим також може створювати реальні новини.'));
+ const topic=element('select'),period=element('select'),test=element('input');topic.name='topicId';topic.required=true;period.name='periodDays';test.name='testMode';test.type='checkbox';test.checked=true;
+ for(const item of topics.filter(t=>t.isActive)){const option=element('option',item.name);option.value=String(item.id);topic.append(option);}
+ for(const [value,title] of [[1,'24 години'],[3,'3 дні'],[7,'7 днів']]){const option=element('option',title);option.value=String(value);period.append(option);}
+ for(const [label,input] of [['Активна тематика',topic],['Період пошуку',period],['Тестовий режим',test]]){const field=element('label',label);field.append(input);form.append(field);}
+ const submit=element('button','Додати завдання в чергу','quiz-link');submit.type='submit';submit.disabled=!topics.some(t=>t.isActive);form.append(submit,action('Скасувати',()=>form.remove()));
+ form.addEventListener('submit',async event=>{event.preventDefault();if(submit.disabled)return;submit.disabled=true;const version=managementVersion;
+  try{const data=await api('/admin/radar/runs',{method:'POST',body:JSON.stringify({topicId:Number(topic.value),periodDays:Number(period.value),testMode:test.checked})});if(version!==managementVersion)return;managementMessage('Очікує запуску. ChatGPT отримає завдання під час наступного виклику MCP.');const host=element('div');form.replaceChildren(host);await runDetails(data.run.id,host);}catch{if(version===managementVersion)managementMessage('Не вдалося додати завдання. Перевірте активність теми; такий ручний запуск уже може очікувати або виконуватися.');submit.disabled=false;}
+ });panel.prepend(form);
+}
+const runStatuses={queued:'Очікує запуску',running:'Виконується',success:'Успішно',failed:'Помилка',partial:'Частково'},runTypes={regular:'Регулярний',manual:'Ручний',test:'Тестовий'};
+function formatTime(value){return value?new Date(value).toLocaleString('uk-UA'):'—';}
+async function runDetails(id,host){
+ const version=managementVersion;host.replaceChildren(element('p','Завантажуємо деталі…'));const data=await api('/admin/radar/runs/'+encodeURIComponent(id));if(version!==managementVersion||management.hidden)return;
+ const run=data.run;host.replaceChildren(element('h3',(runTypes[run.runType]||run.runType)+' · '+(runStatuses[run.status]||run.status)),element('p','Період: '+formatTime(run.searchFrom)+' — '+formatTime(run.searchTo)),element('p','Початок: '+formatTime(run.startedAt)+' · Завершення: '+formatTime(run.finishedAt)));
+ for(const [key,label] of [['foundCount','Знайдено'],['createdCount','Створено'],['publishedCount','Активовано під час створення'],['pendingCount','Передано на модерацію'],['duplicateCount','Дублікатів'],['rejectedCount','Відхилено']])host.append(element('p',label+': '+(run[key]??0)));
+ if(run.errorMessage)host.append(element('p',run.errorMessage));const events=element('ul');for(const event of data.events){const li=element('li'),link=element('a',event.title);link.href=(event.isActive?'radar.html':'admin-radar.html')+'?event='+encodeURIComponent(event.id);li.append(link,element('span',event.isActive?' · активна':' · неактивна'));events.append(li);}host.append(events,action('Оновити статус',()=>runDetails(id,host)));
+}
+async function showRuns(){
+ const version=managementVersion,history=++historyVersion,panel=document.querySelector('#radar-runs-panel');panel.hidden=false;document.querySelector('#radar-topics-panel').hidden=true;panel.replaceChildren(element('p','Завантажуємо історію…'));
+ document.querySelector('#radar-topics-tab').className='page-button';document.querySelector('#radar-runs-tab').className='quiz-link';
+ const params=new URLSearchParams({...runFilter,page:String(runPage)});let data;
+ try{data=await api('/admin/radar/runs?'+params);}catch{if(version===managementVersion)managementMessage('Не вдалося завантажити історію.');return;}
+ if(version!==managementVersion||history!==historyVersion||panel.hidden)return;
+ panel.replaceChildren();const form=element('form',undefined,'radar-form radar-filters'),filters={};
+ for(const [key,label] of [['topicId','Тематика'],['status','Статус'],['runType','Тип запуску'],['from','Початок періоду'],['to','Кінець періоду'],['sort','Порядок']]){
+  const wrap=element('label',label),input=element(['from','to'].includes(key)?'input':'select');
+  if(['from','to'].includes(key)){input.type='datetime-local';if(runFilter[key]){const date=new Date(runFilter[key]);input.value=new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16);}}
+  else{const choices=key==='topicId'?[['','Усі тематики'],...topics.map(t=>[String(t.id),t.name])]:key==='status'?[['','Усі статуси'],...Object.entries(runStatuses)]:key==='runType'?[['','Усі типи'],...Object.entries(runTypes)]:[['desc','Спочатку нові'],['asc','Спочатку давні']];for(const [value,title] of choices){const option=element('option',title);option.value=value;input.append(option);}input.value=runFilter[key]|| (key==='sort'?'desc':'');}
+  wrap.append(input);form.append(wrap);filters[key]=input;
+ }
+ const submit=element('button','Застосувати','quiz-link');submit.type='submit';form.append(submit);form.addEventListener('submit',event=>{event.preventDefault();runFilter={};for(const [key,input] of Object.entries(filters))if(input.value)runFilter[key]=['from','to'].includes(key)?new Date(input.value).toISOString():input.value;runPage=1;showRuns();});panel.append(form);
+ const {wrap,body,label}=table(['Тематика / тип','Час / період','Тривалість','Статус','Знайдено','Створено','Активовано','На модерацію','Дублікати','Відхилено','Деталі / помилка'],'Історія запусків');
+ for(const run of data.runs){const row=element('tr');for(const value of [run.topicName+' · '+(runTypes[run.runType]||'Регулярний'),'Початок: '+formatTime(run.startedAt)+'; завершення: '+formatTime(run.finishedAt)+'; пошук: '+formatTime(run.searchFrom)+' — '+formatTime(run.searchTo),run.durationSeconds+' с',runStatuses[run.status],run.foundCount,run.createdCount??0,run.publishedCount,run.pendingCount??0,run.duplicateCount??0,run.rejectedCount??0])row.append(element('td',String(value)));const cell=element('td');if(run.errorMessage){const details=element('details');details.append(element('summary','Переглянути'),element('p',run.errorMessage));cell.append(details);}if(run.statisticsVersion===1)cell.append(element('p','Історичні дані: класифікація може бути неповною.'));if(run.id){const details=element('div');cell.append(action('Події запуску',()=>runDetails(run.id,details)),details);}row.append(cell);body.append(row);}panel.append(wrap);if(!data.total)panel.append(element('p','Запусків за цими фільтрами немає.'));
+ label();const pager=element('div',undefined,'radar-actions'),prev=action('← Назад',()=>{runPage--;return showRuns();}),next=action('Далі →',()=>{runPage++;return showRuns();});prev.disabled=runPage<=1;next.disabled=runPage*data.pageSize>=data.total;pager.append(prev,element('span','Сторінка '+runPage+' · Запусків: '+data.total),next);panel.append(pager);
+}
+async function loadManagement(){
+ if(!ADMIN||!management||!auth()?.sessionToken)return;const current=generation,version=++managementVersion;management.hidden=false;managementMessage('Завантажуємо тематики…');
+ try{const [data,stats]=await Promise.all([api('/admin/radar/topics'),api('/admin/radar/stats')]);if(current!==generation||version!==managementVersion)return;topics=data.topics;const host=document.querySelector('#radar-stats');host.replaceChildren();for(const [key,label] of [['activeTopics','Активних тематик'],['runs','Запусків за 24 год'],['successful','Успішних'],['failed','З помилками'],['created','Створено'],['published','Активовано'],['pending','На модерацію']])host.append(element('span',label+': '+(stats[key]??0)));showTopics();managementMessage('');}catch{if(current===generation&&version===managementVersion)managementMessage('Не вдалося завантажити керування Radar.');}
+}
+document.querySelector('#radar-topics-tab')?.addEventListener('click',showTopics);
+document.querySelector('#radar-runs-tab')?.addEventListener('click',()=>{runPage=1;showRuns();});
+function auth(){try{return JSON.parse(localStorage.getItem('techhub-auth-v1')||'null');}catch{return null;}}
+function message(text,error=false){status.textContent=text;status.dataset.error=String(error);}
+async function api(path,options={}){const token=auth()?.sessionToken;const response=await fetch(ENDPOINT+path,{...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})}});if(!response.ok){const error=Error('request_failed');error.status=response.status;throw error;}return response.json();}
+function element(tag,text,className){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;}
+function safeUrl(value){try{const url=new URL(value);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password?url.href:null;}catch{return null;}}
+function eventDateText(event){return event.eventDatePrecision==='date'?new Date(event.eventDate).toLocaleDateString('uk-UA',{timeZone:'UTC'}):new Date(event.eventDate).toLocaleString('uk-UA');}
+
+let eventById=new Map(),eventsReady=false,eventsFailed=false,dialog=null,dialogContent=null,returnFocus=null;
+function eventUrl(id){const url=new URL(window.location.href);url.searchParams.set('event',id);return url;}
+function closeEvent(){const url=new URL(window.location.href);if(url.searchParams.has('event')){url.searchParams.delete('event');window.history.pushState(window.history.state,'',url.href);}syncEvent();}
+function ensureDialog(){
+ if(dialog)return;
+ dialog=element('dialog',undefined,'radar-dialog');dialog.setAttribute('aria-labelledby','radar-dialog-title');
+ const inner=element('div',undefined,'radar-dialog-inner'),toolbar=element('div',undefined,'radar-dialog-toolbar'),close=element('button','Закрити','page-button');close.type='button';close.addEventListener('click',closeEvent);toolbar.append(close);
+ dialogContent=element('div');inner.append(toolbar,dialogContent);dialog.append(inner);document.body.append(dialog);
+ dialog.addEventListener('cancel',e=>{e.preventDefault();closeEvent();});
+ dialog.addEventListener('click',e=>{if(e.target!==dialog)return;const rect=dialog.getBoundingClientRect();if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)closeEvent();});
+}
+async function copyLink(url){
+ try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);return;}}catch{}
+ const input=element('textarea');input.value=url;input.setAttribute('aria-label','Посилання на подію');input.style.position='fixed';input.style.opacity='0';(dialog?.open?dialog:document.body).append(input);
+ const focused=document.activeElement;
+ try{input.focus();input.select();if(!document.execCommand('copy'))throw Error('copy_failed');}finally{input.remove();focused?.focus();}
+}
+function icon(name){const paths={share:'<path d="m14 3 7 7-7 7v-5c-6 0-9 3-11 8 0-8 3-12 11-12Z"/>',eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>'};return '<svg viewBox="0 0 24 24" aria-hidden="true">'+paths[name]+'</svg>';}
+function shareAction(event,host){
+ const actions=element('div',undefined,'radar-engagement'),button=element('button',undefined,'radar-icon radar-share'),note=element('p',undefined,'radar-status radar-dialog-note radar-engagement-note');button.type='button';button.innerHTML=icon('share');button.title='Поділитися';button.setAttribute('aria-label','Поділитися подією');note.setAttribute('role','status');actions.append(button,note);host.append(actions);
+ button.addEventListener('click',async()=>{
+  if(button.disabled)return;button.disabled=true;note.textContent='';note.dataset.error='false';
+  const link=eventUrl(event.id);if(ADMIN)link.pathname=link.pathname.replace(/admin-radar\.html$/,'radar.html');const url=link.href;
+  try{
+   if(typeof navigator.share==='function'){
+    try{await navigator.share({title:event.title,url});return;}catch(error){if(error.name==='AbortError')return;}
+   }
+   await copyLink(url);note.textContent='Посилання скопійовано';
+  }catch{note.textContent='Не вдалося скопіювати посилання. Скопіюйте його з адресного рядка.';note.dataset.error='true';}finally{button.disabled=false;}
+ });
+ return {actions,note};
+}
+const likeBusy=new Set(),viewed=new Set();let fallbackVisitor=null;
+function visitorId(){try{let id=localStorage.getItem('jokerhub-radar-visitor');if(!id){id=crypto.randomUUID();localStorage.setItem('jokerhub-radar-visitor',id);}return id;}catch{return fallbackVisitor||(fallbackVisitor=crypto.randomUUID());}}
+function updateMetrics(id,data){const event=eventById.get(id);if(!event)return;Object.assign(event,{viewCount:data.viewCount??event.viewCount,likeCount:data.likeCount??event.likeCount,...(Object.hasOwn(data,'liked')?{liked:data.liked}:{})});for(const host of [list,dialogContent])for(const node of host?.querySelectorAll?.('[data-radar-metrics]')||[]){if(node.dataset.radarMetrics!==id)continue;node.querySelector('.radar-views-count').textContent=String(event.viewCount||0);const button=node.querySelector('.radar-like');button.querySelector('.radar-likes-count').textContent=String(event.likeCount||0);button.setAttribute('aria-pressed',String(!!event.liked));button.setAttribute('aria-label',event.liked?'Зняти вподобання':'Вподобати подію');button.disabled=likeBusy.has(id)||!event.isActive;}}
+function engagement(event,host){const {actions,note}=shareAction(event,host);actions.dataset.radarMetrics=event.id;const views=element('span',undefined,'radar-metric');views.innerHTML=icon('eye');views.title='Перегляди події';views.setAttribute('aria-label','Перегляди');views.append(element('span',String(event.viewCount||0),'radar-views-count'));const like=element('button',undefined,'radar-icon radar-like');like.type='button';like.innerHTML=icon('heart');like.setAttribute('aria-pressed',String(!!event.liked));like.setAttribute('aria-label',event.liked?'Зняти вподобання':'Вподобати подію');like.title=auth()?.sessionToken?'Вподобати подію':'Увійдіть, щоб поставити лайк';like.disabled=likeBusy.has(event.id)||!event.isActive;like.append(element('span',String(event.likeCount||0),'radar-likes-count'));actions.prepend(views,like);
+ like.addEventListener('click',async()=>{if(likeBusy.has(event.id))return;if(!auth()?.sessionToken){note.textContent='Щоб поставити лайк, увійдіть на сторінці квізів. ';const login=element('a','Увійти');login.href='quizzes.html';note.append(login);return;}const current=generation;likeBusy.add(event.id);like.disabled=true;note.textContent='';try{const data=await api('/api/radar/events/'+encodeURIComponent(event.id)+'/likes',{method:event.liked?'DELETE':'POST'});if(current===generation)updateMetrics(event.id,data);}catch(error){if(current===generation){note.textContent=[401,403].includes(error.status)?'Сесія завершилася. Увійдіть знову.':'Не вдалося зберегти лайк. Спробуйте ще раз.';note.dataset.error='true';}}finally{likeBusy.delete(event.id);if(current===generation)updateMetrics(event.id,{});}});
+}
+async function countView(event){if(ADMIN||!event.isActive||viewed.has(event.id))return;viewed.add(event.id);const current=generation;try{const data=await api('/api/radar/events/'+encodeURIComponent(event.id)+'/views',{method:'POST',body:JSON.stringify({visitorId:visitorId()})});if(current===generation)updateMetrics(event.id,{viewCount:data.viewCount});}catch{viewed.delete(event.id);}}
+function details(event,host){host.append(element('p',event.summary,'radar-summary'));for(const [key,label] of [['whyImportant','Чому це важливо'],['practicalImpact','Практичний вплив'],['category','Категорія']])if(event[key])host.append(element('h3',label),element('p',event[key]));if(event.tags?.length){host.append(element('h3','Позначки'));const tags=element('div',undefined,'radar-tags');for(const tag of event.tags)tags.append(element('span',tag,'radar-tag'));host.append(tags);}if(event.eventDate)host.append(element('h3','Дата події'),element('p',eventDateText(event)));if(event.confidence)host.append(element('h3','Впевненість'),element('p',({high:'Висока',medium:'Середня',low:'Низька'})[event.confidence]||event.confidence));if(event.additionalSources?.length){host.append(element('h3','Додаткові джерела'));for(const source of event.additionalSources){const url=safeUrl(source.url);if(!url)continue;const line=element('p'),a=element('a',source.source||'Джерело ↗');a.href=url;a.target='_blank';a.rel='noopener noreferrer';line.append(a);host.append(line);}}if(ADMIN||canModerate){host.append(element('h3','Погодження'));host.append(element('p',!event.isActive?'Подія неактивна':event.approvalMode==='auto'?'Автоматично підтверджено':'Підтверджено вручну'));if(event.approvedAt)host.append(element('p',new Date(event.approvedAt).toLocaleString('uk-UA')+(event.approvedBy?' · '+(event.approvedBy==='system'?'Система':event.approvedBy):'')));}}
+function syncEvent(){
+ const url=new URL(window.location.href);
+ if(!url.searchParams.has('event')){if(dialog?.open){dialog.close();returnFocus?.focus();returnFocus=null;}return;}
+ ensureDialog();dialogContent.replaceChildren();
+ const id=url.searchParams.get('event'),event=eventsReady?eventById.get(id):null;
+ if(event){const detail=card(event,true);detail.querySelector('h2').id='radar-dialog-title';dialogContent.append(detail);countView(event);}
+ else{const heading=element('h2','Подія IT Radar');heading.id='radar-dialog-title';const note=element('p',eventsFailed?'Не вдалося завантажити подію. Спробуйте оновити сторінку.':eventsReady?'Ця подія не знайдена або більше недоступна.':'Завантажуємо подію…','radar-status');note.setAttribute('role','status');dialogContent.append(heading,note);}
+ if(!dialog.open){returnFocus=document.activeElement;dialog.showModal();}
+}
+function openEvent(event){const url=eventUrl(event.id);if(url.href!==window.location.href)window.history.pushState(window.history.state,'',url.href);syncEvent();}
+window.addEventListener('popstate',()=>{if(!ADMIN){selectedTopic=topicFromUrl();if(eventsReady)renderEvents();}syncEvent();});
+
+function card(event,detail=false){
+ const article=element('article',undefined,'radar-event'+((ADMIN||canModerate)&&!event.isActive?' radar-inactive':''));
+ const meta=element('div',undefined,'radar-meta');meta.append(element('span',priorities[event.priority]||event.priority));
+ if(event.topicName)meta.append(element('span',event.topicName,'radar-tag'));
+ if(event.eventType)meta.append(element('span',({security:'Безпека',incident:'Інцидент',release:'Реліз',ai:'AI',tool:'Інструмент'})[event.eventType]||event.eventType));if(event.score!=null)meta.append(element('span',event.score+'/100'));
+ const date=element('time',new Date(event.createdAt).toLocaleString('uk-UA'));date.dateTime=event.createdAt;meta.append(date);
+ if(ADMIN||canModerate)meta.append(element('span',event.isActive?'Активна':'На модерації'));
+ if((ADMIN||canModerate)&&event.isActive&&event.approvalMode==='auto')meta.append(element('span','Автоматично підтверджено'));
+ const heading=element('h2',event.title);
+ if(!ADMIN&&!detail){
+  const open=element('button',event.title,'radar-title-button');open.type='button';open.setAttribute('aria-haspopup','dialog');heading.textContent='';heading.append(open);article.className+=' radar-open';
+  article.addEventListener('click',e=>{if(e.target.closest('a')||e.target.closest('.radar-actions')||e.target.closest('.radar-engagement')||e.target.closest('.radar-expand')||e.target.closest('form'))return;openEvent(event);});
+ }
+ article.append(meta,heading);if(detail)details(event,article);else article.append(element('p',event.summary,'radar-preview'));
+ const source=element('p',undefined,'radar-source');const url=safeUrl(event.sourceUrl);
+ if(url){const link=element('a',event.source||'Джерело ↗');link.href=url;link.target='_blank';link.rel='noopener noreferrer';source.append(link);}else source.textContent=event.source||'Джерело не вказано';article.append(source);
+ if(!detail){const expand=element('button','Докладніше ↓','radar-expand');expand.type='button';if(ADMIN){const region=element('div',undefined,'radar-detail');region.hidden=true;details(event,region);expand.setAttribute('aria-expanded','false');expand.addEventListener('click',()=>{region.hidden=!region.hidden;article.querySelector('.radar-preview').hidden=!region.hidden;expand.setAttribute('aria-expanded',String(!region.hidden));expand.textContent=region.hidden?'Докладніше ↓':'Згорнути ↑';});article.append(expand,region);}else{expand.setAttribute('aria-haspopup','dialog');expand.addEventListener('click',()=>openEvent(event));article.append(expand);}}
+ engagement(event,article);
+ if(ADMIN){
+  const actions=element('div',undefined,'radar-actions'),toggle=element('button',event.isActive?'Деактивувати':'Активувати','quiz-link'),edit=element('button','Редагувати','page-button'),remove=element('button','Видалити','page-button radar-delete');toggle.type=edit.type=remove.type='button';actions.append(toggle,edit,remove);article.append(actions);
+  let busy=false;
+  function setBusy(value){busy=value;toggle.disabled=edit.disabled=remove.disabled=value;}
+  async function save(body){if(busy)return;setBusy(true);try{await api('/admin/radar/events/'+encodeURIComponent(event.id),{method:'PATCH',body:JSON.stringify(body)});await load();}catch{message('Не вдалося зберегти подію. Оновіть список і спробуйте ще раз.',true);}finally{setBusy(false);}}
+  remove.addEventListener('click',async()=>{
+   if(busy||!window.confirm('Видалити подію «'+event.title+'» назавжди? Відновити її буде неможливо.'))return;
+   setBusy(true);try{await api('/admin/radar/events/'+encodeURIComponent(event.id),{method:'DELETE'});await load();}catch{message('Не вдалося видалити подію. Оновіть список і спробуйте ще раз.',true);}finally{setBusy(false);}
+  });
+  toggle.addEventListener('click',()=>save({isActive:!event.isActive}));
+  edit.addEventListener('click',()=>{
+   if(busy||article.querySelector('form'))return;
+   const form=element('form',undefined,'radar-form'),inputs={};
+   for(const [key,label,max] of [['title','Заголовок',200],['summary','Опис',5000],['source','Джерело',200],['sourceUrl','URL джерела',2048],['priority','Пріоритет',0],['eventDate','Дата події: YYYY-MM-DD (UTC) або ISO з часовим поясом',35]]){
+    const field=element('label',label),input=element(key==='summary'?'textarea':key==='priority'?'select':'input');input.name=key;
+    if(key==='priority')for(const priority of Object.keys(priorities)){const option=element('option',priorities[priority]);option.value=priority;input.append(option);}
+    else{input.maxLength=max;input.required=['title','summary'].includes(key);if(key==='sourceUrl')input.type='url';}
+    input.value=key==='eventDate'&&event.eventDatePrecision==='date'?event.eventDate?.slice(0,10)||'':event[key]||'';field.append(input);form.append(field);inputs[key]=input;
+   }
+   const buttons=element('div',undefined,'radar-actions'),submit=element('button','Зберегти','quiz-link'),cancel=element('button','Скасувати','page-button');submit.type='submit';cancel.type='button';buttons.append(submit,cancel);form.append(buttons);article.append(form);inputs.title.focus();
+   cancel.addEventListener('click',()=>form.remove());
+   form.addEventListener('submit',async e=>{e.preventDefault();submit.disabled=cancel.disabled=true;await save(Object.fromEntries(Object.entries(inputs).map(([key,input])=>[key,key==='eventDate'&&!input.value?null:input.value])));submit.disabled=cancel.disabled=false;});
+  });
+ }else if(canModerate){
+  const actions=element('div',undefined,'radar-actions'),toggle=element('button',event.isActive?'Деактивувати':'Активувати','quiz-link'),note=element('p',undefined,'radar-status');
+  toggle.type='button';toggle.disabled=moderationBusy.has(event.id);note.setAttribute('role','status');actions.append(toggle);article.append(actions,note);
+  toggle.addEventListener('click',async()=>{
+   if(!canModerate||moderationBusy.has(event.id))return;
+   const current=generation;moderationBusy.add(event.id);toggle.disabled=true;
+   try{
+    const data=await api('/admin/radar/events/'+encodeURIComponent(event.id),{method:'PATCH',body:JSON.stringify({isActive:!event.isActive})});
+    if(current!==generation||!canModerate)return;
+    moderationBusy.delete(event.id);eventById.set(event.id,{...event,...data.event,viewCount:event.viewCount,likeCount:event.likeCount,liked:event.liked});renderEvents();syncEvent();
+   }catch(error){
+    if(current!==generation)return;
+    if([401,403].includes(error.status)){await load({publicOnly:true});message('Права адміністратора недоступні. Увійдіть знову.',true);}
+    else{note.textContent='Не вдалося змінити стан події. Спробуйте ще раз.';note.dataset.error='true';}
+   }finally{moderationBusy.delete(event.id);if(current===generation){toggle.disabled=false;for(const host of [list,dialogContent])for(const button of host?.querySelectorAll?.('[data-radar-toggle]')||[])if(button.dataset.radarToggle===event.id)button.disabled=false;}}
+  });
+  toggle.dataset.radarToggle=event.id;
+ }
+ return article;
+}
+function renderEvents(){const all=[...eventById.values()];renderTopicNavigation(all);const events=ADMIN||selectedTopic==='all'?all:all.filter(event=>selectedTopic==='unassigned'?event.topicId==null:String(event.topicId)===selectedTopic);list.replaceChildren(...events.map(event=>card(event)));message(events.length?'Подій: '+events.length+(selectedTopic==='all'||ADMIN?'':' із '+all.length)+'.':selectedTopic==='all'||ADMIN?'Подій поки немає.':'У цій темі поки немає подій.');}
+async function load({publicOnly=false}={}){const current=++generation;canModerate=false;eventsReady=false;eventsFailed=false;eventById.clear();syncEvent();list.replaceChildren();hideSettings();hideTopicNavigation();selectedTopic=topicFromUrl();message(ADMIN?'Перевіряємо доступ…':'Завантажуємо події…');try{
+ if(ADMIN){if(!auth()?.sessionToken){message('Увійдіть через Google на сторінці тестів.',true);return;}const me=await api('/auth/me');if(current!==generation)return;if(me.user.role!=='admin'){message('Ця сторінка доступна лише адміністратору.',true);return;}}
+ if(!ADMIN&&!publicOnly&&auth()?.sessionToken){try{const me=await api('/auth/me');if(current!==generation)return;canModerate=me.user?.role==='admin';}catch{if(current!==generation)return;}}
+ if(ADMIN){loadSettings(current);loadManagement();}
+ let data;try{data=await api(ADMIN||canModerate?'/admin/radar/events':'/api/radar/events');}catch(error){if(current!==generation)return;if(!ADMIN&&canModerate&&[401,403].includes(error.status)){canModerate=false;data=await api('/api/radar/events');}else throw error;}if(current!==generation)return;
+ const events=data.events||[];eventById=new Map(events.map(event=>[event.id,event]));eventsReady=true;renderEvents();syncEvent();
+ }catch(error){if(current!==generation)return;eventsFailed=true;syncEvent();message(ADMIN&&[401,403].includes(error.status)?'Потрібна чинна сесія адміністратора.':'Не вдалося завантажити події. Спробуйте оновити сторінку.',true);}}
+window.addEventListener('techhub-auth-changed',load);window.addEventListener('storage',event=>{if(event.key==='techhub-auth-v1'||event.key===null)load();});
+document.querySelector('[data-auth-logout]')?.addEventListener('click',()=>{if(!ADMIN){load({publicOnly:true});return;}generation++;canModerate=false;eventById.clear();eventsReady=false;hideSettings();if(dialog){dialog.close();dialogContent?.replaceChildren();}list.replaceChildren();message('Вихід із профілю.');},{capture:true});
+load();
+})();
