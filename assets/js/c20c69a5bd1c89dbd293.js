@@ -102,6 +102,35 @@ async function request(path,token){const response=await fetch(CATALOG.endpoint+p
 
 const SAFE_COVER=/^assets\/groups\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:png|jpe?g|webp)$/;
 
+function initHomeVideo(){
+ const intro=document.querySelector('.hub-intro');if(!intro)return;
+ const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+ const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+ const layer=document.createElement('div');layer.className='home-video-layer';layer.setAttribute('aria-hidden','true');
+ const video=document.createElement('video');video.muted=true;video.defaultMuted=true;video.loop=true;video.playsInline=true;video.preload='none';video.setAttribute('muted','');video.setAttribute('playsinline','');video.disablePictureInPicture=true;video.tabIndex=-1;layer.append(video);intro.prepend(layer);
+ const button=document.createElement('button');button.type='button';button.className='home-video-toggle';button.textContent='Відтворити фон';button.setAttribute('aria-label','Відтворити фонове відео');intro.append(button);
+ let wanted=false,manual=false,inView=intro.getBoundingClientRect().bottom>0&&intro.getBoundingClientRect().top<window.innerHeight,loadingTimer,stallTimer;
+ function clearTimers(){clearTimeout(loadingTimer);clearTimeout(stallTimer);}
+ function showPlaying(playing){layer.classList.toggle('is-playing',playing);button.textContent=playing?'Зупинити фон':'Відтворити фон';button.setAttribute('aria-label',playing?'Зупинити фонове відео':'Відтворити фонове відео');}
+ function pause(){clearTimers();video.pause();showPlaying(false);}
+ function stop(){wanted=false;pause();video.removeAttribute('src');video.load();}
+ function fastConnection(){return !!connection&&!connection.saveData&&connection.effectiveType==='4g'&&(!Number.isFinite(connection.downlink)||connection.downlink>=2.5)&&(!Number.isFinite(connection.rtt)||connection.rtt<=300);}
+ function play(){
+  if(!wanted||!inView||document.hidden)return;
+  if(!video.hasAttribute('src')){video.src='assets/videos/joker-lab-background-v1.mp4';video.load();}
+  clearTimers();loadingTimer=setTimeout(stop,6000);
+  const promise=video.play();if(promise)promise.catch(()=>{if(wanted&&inView&&!document.hidden)stop();});
+ }
+ video.addEventListener('playing',()=>{clearTimers();if(wanted&&inView&&!document.hidden)showPlaying(true);else pause();});
+ video.addEventListener('error',stop);
+ video.addEventListener('waiting',()=>{if(wanted){clearTimeout(stallTimer);stallTimer=setTimeout(stop,3000);}});
+ button.addEventListener('click',()=>{manual=true;if(wanted){stop();}else{wanted=true;play();}});
+ function auto(){if(manual)return;wanted=!motion.matches&&fastConnection();if(wanted)play();else stop();}
+ connection?.addEventListener?.('change',()=>{manual=false;auto();});motion.addEventListener('change',()=>{manual=false;auto();});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else play();});
+ if(typeof IntersectionObserver!=='undefined')new IntersectionObserver(entries=>{inView=entries[0].isIntersecting;if(inView)play();else pause();}).observe(intro);
+ window.addEventListener('pagehide',pause);window.addEventListener('pageshow',()=>play());auto();
+}
 const rail=document.querySelector('#article-rail'),previous=document.querySelector('#rail-prev'),next=document.querySelector('#rail-next');
 function updateRail(){previous.disabled=rail.scrollLeft<=1;next.disabled=rail.scrollLeft+rail.clientWidth>=rail.scrollWidth-1;}
 function shiftRail(direction){rail.scrollBy({left:direction*rail.clientWidth,behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
@@ -112,5 +141,5 @@ function groupCard(group){const link=document.createElement('a');link.className=
 let homeArticlesRequest=0;
 async function loadHomeArticles(publicOnly=false){const generation=++homeArticlesRequest;rail.replaceChildren();updateRail();document.querySelector('#admin-link').hidden=true;document.querySelector('#catalog-error').hidden=true;document.querySelector('#articles-empty').hidden=true;document.querySelector('#material-count').textContent='Завантажуємо статті…';try{const token=publicOnly?null:savedAuth()?.sessionToken;let admin=false;if(token){try{const me=await request('/auth/me',token);admin=me.user.role==='admin';}catch{}}if(generation!==homeArticlesRequest)return;let result;if(admin){try{result=await request('/admin/articles',token);}catch{admin=false;}}if(!result)result=await request('/articles',token);if(generation!==homeArticlesRequest)return;const visible=(result.articles||[]).filter(article=>admin||(article.status!=='hidden'&&!isScheduledArticle(article)));rail.replaceChildren(...visible.map(createCard));document.querySelector('#admin-link').hidden=!admin;document.querySelector('#material-count').textContent=materialCount(visible.length);document.querySelector('#articles-empty').hidden=visible.length>0;updateRail();}catch{if(generation!==homeArticlesRequest)return;document.querySelector('#catalog-error').hidden=false;document.querySelector('#material-count').textContent='Каталог недоступний';}}
 async function loadHomeGroups(){try{const result=await request('/article-groups');const groups=result.groups||[];document.querySelector('#group-grid').replaceChildren(...groups.map(groupCard));document.querySelector('#groups-empty').hidden=groups.length>0;}catch{document.querySelector('#groups-error').hidden=false;}finally{document.querySelector('#groups-loading').hidden=true;}}
-function initHome(){previous.addEventListener('click',()=>shiftRail(-1));next.addEventListener('click',()=>shiftRail(1));rail.addEventListener('scroll',updateRail,{passive:true});rail.addEventListener('keydown',event=>{if(event.target!==rail)return;if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();shiftRail(event.key==='ArrowRight'?1:-1);}});window.addEventListener('resize',updateRail);if(typeof ResizeObserver!=='undefined')new ResizeObserver(updateRail).observe(rail);window.addEventListener('techhub-auth-changed',()=>loadHomeArticles());window.addEventListener('storage',event=>{if(event.key==='techhub-auth-v1'||event.key===null)loadHomeArticles();});document.querySelector('[data-auth-logout]')?.addEventListener('click',()=>loadHomeArticles(true),{capture:true});loadHomeArticles();loadHomeGroups();}
+function initHome(){initHomeVideo();previous.addEventListener('click',()=>shiftRail(-1));next.addEventListener('click',()=>shiftRail(1));rail.addEventListener('scroll',updateRail,{passive:true});rail.addEventListener('keydown',event=>{if(event.target!==rail)return;if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();shiftRail(event.key==='ArrowRight'?1:-1);}});window.addEventListener('resize',updateRail);if(typeof ResizeObserver!=='undefined')new ResizeObserver(updateRail).observe(rail);window.addEventListener('techhub-auth-changed',()=>loadHomeArticles());window.addEventListener('storage',event=>{if(event.key==='techhub-auth-v1'||event.key===null)loadHomeArticles();});document.querySelector('[data-auth-logout]')?.addEventListener('click',()=>loadHomeArticles(true),{capture:true});loadHomeArticles();loadHomeGroups();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initHome,{once:true});else initHome();
