@@ -1,0 +1,23 @@
+(()=>{
+const API="https://techhub-quiz-api.bolotin-denis.workers.dev",KEY='techhub-auth-v1',box=document.querySelector('[data-auth-profile]');if(!box)return;
+const login=document.querySelector('[data-auth-login]'),avatar=box.querySelector('[data-auth-avatar]'),fallback=box.querySelector('[data-auth-fallback]'),name=box.querySelector('[data-auth-name]'),logout=box.querySelector('[data-auth-logout]');let current=null,generation=0;
+const trigger=box.querySelector('[data-auth-trigger]'),panel=box.querySelector('[data-auth-panel]'),accountName=box.querySelector('[data-auth-account-name]'),email=box.querySelector('[data-auth-email]'),accountAvatar=box.querySelector('[data-auth-account-avatar]'),accountFallback=box.querySelector('[data-auth-account-fallback]');
+function closeProfile(restore=false){panel.hidden=true;trigger.setAttribute('aria-expanded','false');if(restore&&!box.hidden)trigger.focus();}
+trigger.addEventListener('click',()=>{const open=panel.hidden;panel.hidden=!open;trigger.setAttribute('aria-expanded',String(open));});
+document.addEventListener('click',event=>{if(!box.contains(event.target))closeProfile();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden){event.preventDefault();closeProfile(true);}});
+box.addEventListener('focusout',event=>{if(!box.contains(event.relatedTarget))closeProfile();});
+if(login){const destination=new URL(login.href,location.href),existing=destination.searchParams.get('return');destination.searchParams.set('return',existing?existing+location.hash:(location.pathname.split('/').pop()||'index.html')+location.search+location.hash);login.href=destination.href;}
+function initials(value){return String(value||'?').trim().split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toLocaleUpperCase('uk')||'?'}
+function showAvatar(value){for(const [image,placeholder] of [[avatar,fallback],[accountAvatar,accountFallback]]){placeholder.textContent=initials(name.textContent);placeholder.hidden=false;image.hidden=true;image.removeAttribute('src');if(!value)continue;image.onload=()=>{image.hidden=false;placeholder.hidden=true};image.onerror=()=>{image.hidden=true;placeholder.hidden=false};image.src=value;}}
+function showIdentity(user,displayName){name.textContent=displayName||user?.displayName||'Користувач';accountName.textContent=user?.displayName||name.textContent;email.textContent=user?.email||'';email.hidden=!email.textContent;showAvatar(user?.avatarUrl);}
+function show(value){current=value;closeProfile();if(login)login.hidden=!!value?.sessionToken;if(!value?.sessionToken){box.hidden=true;name.textContent='';accountName.textContent='';email.textContent='';email.hidden=true;showAvatar(null);return;}showIdentity(value.user,value.leaderboardName);box.hidden=false;}
+window.addEventListener('techhub-profile-changed',event=>{generation++;closeProfile();const user=event.detail?.user;if(!user){show(null);return;}current=null;if(login)login.hidden=true;showIdentity(user);box.hidden=false;});
+function stored(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null;}}
+function clearStored(){try{localStorage.removeItem(KEY)}catch{}}
+async function validate(){const version=++generation,saved=stored();if(!saved?.sessionToken){show(null);return;}const active=()=>version===generation&&stored()?.sessionToken===saved.sessionToken;try{const response=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+saved.sessionToken}});if(!active())return;if(response.status===401){clearStored();show(null);return;}if(!response.ok){show(saved);return;}const data=await response.json();if(!active())return;const updated={...stored(),expiresAt:data.expiresAt,user:data.user};localStorage.setItem(KEY,JSON.stringify(updated));show(updated);}catch{if(active())show(saved);}}
+window.addEventListener('techhub-auth-changed',event=>{generation++;show(event.detail);});
+window.addEventListener('storage',event=>{if(event.key===KEY||event.key===null)validate();});
+logout.addEventListener('click',async()=>{generation++;const token=current?.sessionToken||stored()?.sessionToken;clearStored();show(null);window.dispatchEvent(new CustomEvent('techhub-auth-changed',{detail:null}));if(token)try{await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+token}})}catch{}if(!stored()?.sessionToken&&/(?:^|\/)(?:quizzes|quiz|quiz-[^/]+|article-test|leaderboard)\.html$/.test(location.pathname))location.href='quizzes.html';});
+validate();
+})();
